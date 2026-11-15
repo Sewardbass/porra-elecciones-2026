@@ -3,13 +3,16 @@ import {
   POLL_TIERS,
   PARTIES_CATALOG,
   mergeCatalogWithCustom,
-  slugifyFriendKey
+  slugifyFriendKey,
+  slugifyGroupKey,
+  formatGroupLabel
 } from './data.js';
 import { scoreParty, rankPredictions } from './scoring.js';
 import { escapeHtml, getTotalSeats, getTotalPct, renderHemicycleSVG } from './hemicycle.js';
 import {
   detectBackendMode,
   loadAllData,
+  listKnownGroups,
   savePrediction,
   deletePrediction,
   saveOfficialResults,
@@ -23,6 +26,8 @@ import {
 // =============================================================================
 const state = {
   backend: { mode: 'local', label: 'Cargando...', shared: false },
+  groupKey: 'general',
+  knownGroups: ['general'],
   activeTab: 'predict', // 'predict' | 'group' | 'ranking' | 'scoring' | 'base'
   loading: true,
   saving: false,
@@ -32,6 +37,8 @@ const state = {
   editor: {
     editingKey: null,
     friendName: '',
+    pin: '',
+    showPin: false,
     turnout: 70.4,
     comment: '',
     search: '',
@@ -150,9 +157,66 @@ function formatDateTime(iso) {
 }
 
 // =============================================================================
+// GESTIÓN DE GRUPOS EN LA URL (?grupo=...)
+// =============================================================================
+function getInitialGroupKeyFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get('grupo') || params.get('group') || window.PORRA_CONFIG?.DEFAULT_GROUP || 'general';
+  return slugifyGroupKey(raw);
+}
+
+function buildGroupShareUrl(groupKey) {
+  const gk = slugifyGroupKey(groupKey);
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('group');
+    url.searchParams.delete('previewLock');
+    url.searchParams.set('grupo', gk);
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return `?grupo=${encodeURIComponent(gk)}`;
+  }
+}
+
+function syncUrlGroupParam(groupKey) {
+  const gk = slugifyGroupKey(groupKey);
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('group');
+    url.searchParams.set('grupo', gk);
+    window.history.replaceState({}, '', url.toString());
+  } catch {
+    // Entornos sin history.replaceState
+  }
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback textarea más abajo
+    }
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
+
+// =============================================================================
 // ARRANQUE Y RECARGA DE DATOS
 // =============================================================================
 async function bootstrap() {
+  state.groupKey = getInitialGroupKeyFromUrl();
   initEditorDefaults();
   updateChrome();
   renderApp();
@@ -173,11 +237,14 @@ async function bootstrap() {
 }
 
 async function refreshFromBackend() {
-  const data = await loadAllData(state.backend);
+  const data = await loadAllData(state.backend, state.groupKey);
   state.predictions = data.predictions || [];
   state.officialResults = data.officialResults || null;
-  if (!state.group.selectedFriendKey && state.predictions.length > 0) {
-    state.group.selectedFriendKey = state.predictions[0].friendKey;
+  if (!state.knownGroups.includes(state.groupKey)) {
+    state.knownGroups = [...state.knownGroups, state.groupKey].sort();
+  }
+  if (!state.predictions.some(p => p.friendKey === state.group.selectedFriendKey)) {
+    state.group.selectedFriendKey = state.predictions[0]?.friendKey || null;
   }
   // Preparar borrador de resultados oficiales
   if (state.officialResults) {
@@ -206,8 +273,12 @@ function updateDeadlineBadge() {
 
 function updateChrome() {
   const cfg = window.PORRA_CONFIG || {};
+  const groupLabel = formatGroupLabel(state.groupKey);
   document.getElementById('header-title').textContent = cfg.POOL_TITLE || 'Porra Elecciones España 2026';
-  document.getElementById('header-sub').textContent = `${cfg.POOL_SUBTITLE || '350 escaños'} · Sin PIN · Editable hasta el 28/11 23:59`;
+  document.getElementById('header-sub').textContent =
+    `${cfg.POOL_SUBTITLE || '350 escaños'} · Grupo "${groupLabel}" · PIN 4 dígitos · Cierre 28/11 23:59`;
+  const groupNameEl = document.getElementById('header-group-name');
+  if (groupNameEl) groupNameEl.textContent = groupLabel;
 
   updateDeadlineBadge();
 
@@ -493,6 +564,12 @@ function renderPredictView() {
     `;
   }).join('');
 
+  const editingPred = state.editor.editingKey
+    ? state.predictions.find(p => p.friendKey === state.editor.editingKey)
+    : null;
+  const needsLegacyPin = Boolean(editingPred && editingPred.hasPin === false);
+  const groupLabel = formatGroupLabel(state.groupKey);
+
   return `
     ${locked ? `
       <div class="banner-notice badge-error">
@@ -504,16 +581,26 @@ function renderPredictView() {
       <!-- Columna izquierda: Perfil + Hemiciclo + Guardar -->
       <div class="sticky-col stack-md">
         <div class="card stack-sm">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
             <strong style="font-size:15px;">1. ¿Quién hace la porra?</strong>
-            <span class="badge">Sin PIN</span>
+            <span class="badge ${state.editor.editingKey ? '' : 'badge-primary'}">
+              ${state.editor.editingKey ? (needsLegacyPin ? 'Sin PIN previo' : 'Protegida con PIN') : 'PIN de 4 dígitos'}
+            </span>
+          </div>
+
+          <div class="formula-box" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;">
+            <span style="font-size:12px;">Grupo: <strong>${escapeHtml(groupLabel)}</strong></span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm" style="padding:3px 8px;font-size:11px;" onclick="window.__porraActions.copyGroupLink()">Copiar enlace</button>
+              <button type="button" class="btn btn-sm" style="padding:3px 8px;font-size:11px;" onclick="window.__porraActions.openGroupModal()">Cambiar</button>
+            </div>
           </div>
 
           ${state.predictions.length > 0 ? `
             <div>
               <div class="label">Editar una porra ya guardada (o escribe un nombre nuevo abajo):</div>
               <div class="chips-row">
-                <button class="chip ${!state.editor.editingKey ? 'active' : ''}" onclick="window.__porraActions.newFriendDraft()">+ Nuevo amigo</button>
+                <button class="chip ${!state.editor.editingKey ? 'active' : ''}" onclick="window.__porraActions.newFriendDraft()">+ Nuevo participante</button>
                 ${existingPills}
               </div>
             </div>
@@ -525,6 +612,32 @@ function renderPredictView() {
               value="${escapeHtml(state.editor.friendName)}" ${locked ? 'disabled' : ''}
               oninput="window.__porraActions.setFriendName(this.value)"
               placeholder="Ej. Alex, Lucía, Carlos..." />
+          </div>
+
+          <div>
+            <label class="label" for="friend-pin-input">
+              ${state.editor.editingKey
+                ? (needsLegacyPin
+                    ? 'Esta porra no tenía PIN: crea uno de 4 dígitos para protegerla'
+                    : `PIN de 4 dígitos de ${escapeHtml(state.editor.friendName || 'esta porra')} (necesario para editar o borrar)`)
+                : 'PIN de 4 dígitos (protege tu porra para que nadie la cambie)'}
+            </label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input id="friend-pin-input" class="input tabular" style="flex:1;letter-spacing:0.18em;font-weight:700;"
+                type="${state.editor.showPin ? 'text' : 'password'}"
+                inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off"
+                value="${escapeHtml(state.editor.pin)}" ${locked ? 'disabled' : ''}
+                oninput="window.__porraActions.setFriendPin(this.value)"
+                placeholder="4 dígitos (ej. 4821)" />
+              <button type="button" class="btn btn-sm" ${locked ? 'disabled' : ''} onclick="window.__porraActions.togglePinVisibility()">
+                ${state.editor.showPin ? 'Ocultar' : 'Ver'}
+              </button>
+              ${(!state.editor.editingKey || needsLegacyPin) ? `
+                <button type="button" class="btn btn-sm" ${locked ? 'disabled' : ''} onclick="window.__porraActions.generateRandomPin()" title="Generar PIN aleatorio de 4 cifras">
+                  Aleatorio
+                </button>
+              ` : ''}
+            </div>
           </div>
         </div>
 
@@ -644,20 +757,46 @@ function renderPredictView() {
 // =============================================================================
 // VISTA 2: PORRAS DEL GRUPO
 // =============================================================================
+function renderGroupBannerCard() {
+  const groupLabel = formatGroupLabel(state.groupKey);
+  const shareUrl = buildGroupShareUrl(state.groupKey);
+  return `
+    <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;">
+      <div style="min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-primary">Grupo: ${escapeHtml(groupLabel)}</span>
+          <span class="text-muted" style="font-size:12px;">Enlace independiente: <code>?grupo=${escapeHtml(state.groupKey)}</code></span>
+        </div>
+        <div class="text-muted" style="font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:600px;">
+          ${escapeHtml(shareUrl)}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="window.__porraActions.copyGroupLink()">Copiar enlace</button>
+        <button class="btn btn-sm btn-primary" onclick="window.__porraActions.openGroupModal()">Cambiar / Crear grupo</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderGroupView() {
   const catalog = getFullCatalog();
   const preds = state.predictions;
   const locked = isDeadlinePassed();
+  const groupBanner = renderGroupBannerCard();
 
   if (!preds.length) {
     return `
-      <div class="card stack-md" style="text-align:center;padding:36px 20px;">
-        <div style="font-size:16px;font-weight:800;">Aún no hay predicciones guardadas</div>
-        <p class="text-muted" style="max-width:460px;margin:0 auto;">
-          Sé el primero en guardar tu porra en la pestaña <strong>Mi Porra</strong>. En cuanto tus amigos guarden la suya, aparecerán aquí para compararlas todas.
-        </p>
-        <div>
-          <button class="btn btn-primary" onclick="window.__porraActions.switchTab('predict')">Ir a hacer mi porra</button>
+      <div class="stack-md">
+        ${groupBanner}
+        <div class="card stack-md" style="text-align:center;padding:36px 20px;">
+          <div style="font-size:16px;font-weight:800;">Aún no hay predicciones en "${escapeHtml(formatGroupLabel(state.groupKey))}"</div>
+          <p class="text-muted" style="max-width:460px;margin:0 auto;">
+            Sé el primero en guardar tu porra en la pestaña <strong>Mi Porra</strong> o comparte el enlace de este grupo para que se unan tus amigos o familia.
+          </p>
+          <div>
+            <button class="btn btn-primary" onclick="window.__porraActions.switchTab('predict')">Ir a hacer mi porra</button>
+          </div>
         </div>
       </div>
     `;
@@ -688,11 +827,12 @@ function renderGroupView() {
 
   return `
     <div class="stack-md">
+      ${groupBanner}
       <div class="grid-3">
         <div class="card">
-          <div class="text-muted" style="font-size:12px;">Participantes</div>
-          <div class="tabular" style="font-size:22px;font-weight:800;margin-top:4px;">${preds.length} ${preds.length === 1 ? 'amigo' : 'amigos'}</div>
-          <div class="text-muted" style="font-size:12px;margin-top:2px;">Todos ven las porras de todos</div>
+          <div class="text-muted" style="font-size:12px;">Participantes (${escapeHtml(formatGroupLabel(state.groupKey))})</div>
+          <div class="tabular" style="font-size:22px;font-weight:800;margin-top:4px;">${preds.length} ${preds.length === 1 ? 'persona' : 'personas'}</div>
+          <div class="text-muted" style="font-size:12px;margin-top:2px;">Solo los miembros de este grupo</div>
         </div>
         <div class="card">
           <div class="text-muted" style="font-size:12px;">Media del grupo (principales)</div>
@@ -880,6 +1020,7 @@ function renderRankingView() {
   const catalog = getFullCatalog();
   const activeResults = state.officialResults || (state.ranking.demoResultsActive ? state.ranking.demoResults : null);
   const isDemo = !state.officialResults && state.ranking.demoResultsActive;
+  const groupBanner = renderGroupBannerCard();
 
   // Editor de resultados oficiales (para el organizador)
   const officialEditorHtml = state.ranking.showOfficialEditor ? renderOfficialEditorBox(catalog) : '';
@@ -887,10 +1028,11 @@ function renderRankingView() {
   if (!activeResults) {
     return `
       <div class="stack-md">
+        ${groupBanner}
         <div class="card stack-md" style="text-align:center;padding:34px 20px;">
           <div style="font-size:17px;font-weight:800;">Esperando los resultados del 29 de noviembre de 2026</div>
           <p class="text-muted" style="max-width:540px;margin:0 auto;">
-            Cuando acabe el escrutinio tras las elecciones, carga aquí los diputados reales de cada partido y se calculará el ranking con el sistema <strong>+1 por diputado acertado y −1 por diputado de desviación</strong>.
+            Cuando acabe el escrutinio tras las elecciones, carga aquí los diputados reales de cada partido y se calculará el ranking del grupo <strong>${escapeHtml(formatGroupLabel(state.groupKey))}</strong> con el sistema <strong>+1 por diputado acertado y −1 por diputado de desviación</strong>.
           </p>
           <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding-top:6px;">
             <button class="btn btn-primary" onclick="window.__porraActions.toggleOfficialEditor()">
@@ -910,6 +1052,7 @@ function renderRankingView() {
 
   return `
     <div class="stack-md">
+      ${groupBanner}
       <div class="card stack-sm">
         <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1343,6 +1486,105 @@ function closeCloudModal() {
 }
 
 // =============================================================================
+// MODAL DE GRUPOS SEPARADOS Y ENLACE COMPARTIBLE
+// =============================================================================
+function renderGroupModalBody() {
+  const body = document.getElementById('group-modal-body');
+  if (!body) return;
+  const activeLabel = formatGroupLabel(state.groupKey);
+  const activeUrl = buildGroupShareUrl(state.groupKey);
+  const merged = Array.from(new Set([state.groupKey, ...state.knownGroups, 'general', 'amigos', 'familia', 'trabajo']));
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <strong style="font-size:16px;">Grupos separados y enlaces</strong>
+      <button class="btn btn-sm" onclick="window.__porraActions.closeGroupModal()">Cerrar</button>
+    </div>
+
+    <div class="formula-box stack-sm" style="font-size:12px;">
+      <div>Cada grupo tiene su propia lista de participantes y su propio ranking usando <code>?grupo=...</code> en la URL (los resultados oficiales del 29-N son comunes para todos).</div>
+      <div>Grupo actual: <strong>${escapeHtml(activeLabel)}</strong> (<code>?grupo=${escapeHtml(state.groupKey)}</code>)</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+        <input class="input" type="text" readonly value="${escapeHtml(activeUrl)}" style="flex:1;min-width:210px;font-size:12px;" onclick="this.select()" />
+        <button class="btn btn-primary btn-sm" onclick="window.__porraActions.copyGroupLink()">Copiar enlace</button>
+      </div>
+    </div>
+
+    <div class="stack-sm">
+      <div class="label">Cambiar rápido de grupo:</div>
+      <div class="chips-row">
+        ${merged.map(gk => `
+          <button class="chip ${gk === state.groupKey ? 'active' : ''}" onclick="window.__porraActions.selectGroupSlug('${gk}')">
+            ${escapeHtml(formatGroupLabel(gk))}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="stack-sm" style="border-top:1px solid var(--border);padding-top:12px;">
+      <label class="label" for="new-group-name-input">Crear o abrir otro grupo distinto</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input id="new-group-name-input" class="input" style="flex:1;min-width:190px;" type="text" maxlength="40"
+          placeholder="Ej. Familia Pérez, Amigos curro, Clase..."
+          oninput="window.__porraActions.previewGroupInput(this.value)" />
+        <button class="btn btn-primary btn-sm" onclick="window.__porraActions.createGroupFromInput()">Abrir grupo</button>
+        <button class="btn btn-sm" onclick="window.__porraActions.copyCustomGroupLink()">Copiar su enlace</button>
+      </div>
+      <div id="new-group-url-preview" class="text-muted" style="font-size:11px;word-break:break-all;">
+        Ejemplo de enlace: ${escapeHtml(buildGroupShareUrl('amigos'))}
+      </div>
+    </div>
+  `;
+}
+
+async function openGroupModal() {
+  const modal = document.getElementById('group-modal');
+  renderGroupModalBody();
+  modal.classList.remove('hidden');
+  try {
+    const groups = await listKnownGroups(state.backend);
+    state.knownGroups = Array.from(new Set([state.groupKey, ...groups])).sort();
+    if (!modal.classList.contains('hidden')) {
+      renderGroupModalBody();
+    }
+  } catch {
+    // Mantiene la lista local si falla la consulta
+  }
+}
+
+function closeGroupModal() {
+  document.getElementById('group-modal').classList.add('hidden');
+}
+
+async function switchActiveGroup(rawGroup) {
+  const nextKey = slugifyGroupKey(rawGroup);
+  closeGroupModal();
+  state.groupKey = nextKey;
+  syncUrlGroupParam(nextKey);
+  state.customParties = [];
+  state.editor.editingKey = null;
+  state.editor.friendName = '';
+  state.editor.pin = '';
+  state.editor.showPin = false;
+  state.editor.comment = '';
+  state.ranking.expandedFriendKey = null;
+  initEditorDefaults();
+  state.loading = true;
+  updateChrome();
+  renderApp();
+  try {
+    await refreshFromBackend();
+    showToast(`Grupo activo: ${formatGroupLabel(nextKey)}`);
+  } catch (err) {
+    showToast(`Error cargando el grupo: ${err.message}`, 'error');
+  } finally {
+    state.loading = false;
+    updateChrome();
+    renderApp();
+  }
+}
+
+// =============================================================================
 // ACCIONES EXPUESTAS PARA LOS EVENTOS DEL DOM
 // =============================================================================
 window.__porraActions = {
@@ -1360,6 +1602,27 @@ window.__porraActions = {
 
   setFriendName(val) {
     state.editor.friendName = val;
+  },
+
+  setFriendPin(val) {
+    const clean = String(val || '').replace(/\D+/g, '').slice(0, 4);
+    state.editor.pin = clean;
+    const input = document.getElementById('friend-pin-input');
+    if (input && input.value !== clean) input.value = clean;
+  },
+
+  togglePinVisibility() {
+    state.editor.showPin = !state.editor.showPin;
+    renderApp();
+  },
+
+  generateRandomPin() {
+    if (isDeadlinePassed()) return;
+    const pin = String(Math.floor(1000 + Math.random() * 9000));
+    state.editor.pin = pin;
+    state.editor.showPin = true;
+    renderApp();
+    showToast(`PIN generado: ${pin} (guárdalo para editar después)`);
   },
 
   setTurnout(val) {
@@ -1455,6 +1718,8 @@ window.__porraActions = {
   newFriendDraft() {
     state.editor.editingKey = null;
     state.editor.friendName = '';
+    state.editor.pin = '';
+    state.editor.showPin = false;
     state.editor.turnout = 70.4;
     state.editor.comment = '';
     initEditorDefaults();
@@ -1466,6 +1731,8 @@ window.__porraActions = {
     if (!f) return;
     state.editor.editingKey = f.friendKey;
     state.editor.friendName = f.friendName;
+    state.editor.pin = '';
+    state.editor.showPin = false;
     state.editor.turnout = f.turnout ?? 70.4;
     state.editor.comment = f.comment || '';
     (f.customParties || []).forEach(cp => {
@@ -1480,7 +1747,11 @@ window.__porraActions = {
     state.activeTab = 'predict';
     updateChrome();
     renderApp();
-    showToast(`Cargada la porra de ${f.friendName}`);
+    showToast(
+      f.hasPin === false
+        ? `Cargada la porra de ${f.friendName}. Añade un PIN de 4 dígitos para protegerla.`
+        : `Cargada la porra de ${f.friendName}. Introduce su PIN de 4 dígitos para editarla.`
+    );
   },
 
   toggleCustomDrawer() {
@@ -1524,13 +1795,32 @@ window.__porraActions = {
       showToast('Escribe tu nombre para guardar la porra', 'warning');
       return;
     }
+
+    const pin = String(state.editor.pin || '').trim();
+    if (!/^\d{4}$/.test(pin)) {
+      showToast('Introduce un PIN numérico de 4 dígitos para proteger esta porra', 'warning');
+      return;
+    }
+
+    const isNew = !state.editor.editingKey;
+    const friendKey = state.editor.editingKey || slugifyFriendKey(name);
+    if (isNew) {
+      const collision = state.predictions.find(p => p.friendKey === friendKey);
+      if (collision) {
+        showToast(
+          `Ya existe "${collision.friendName}" en este grupo. Selecciónalo arriba para editar con su PIN o añade tu apellido/apodo.`,
+          'warning'
+        );
+        return;
+      }
+    }
+
     const total = getTotalSeats(state.editor.seats);
     if (total !== 350) {
       showToast(`Debes repartir exactamente 350 diputados (ahora tienes ${total})`, 'warning');
       return;
     }
 
-    const friendKey = state.editor.editingKey || slugifyFriendKey(name);
     const cleanSeats = {};
     const cleanPct = {};
     const usedCustom = [];
@@ -1549,8 +1839,10 @@ window.__porraActions = {
     renderApp();
     try {
       const saved = await savePrediction(state.backend, {
+        groupKey: state.groupKey,
         friendKey,
         friendName: name,
+        pin,
         seats: cleanSeats,
         pct: cleanPct,
         turnout: parseFloat(state.editor.turnout || 70.4) || null,
@@ -1562,7 +1854,11 @@ window.__porraActions = {
       state.editor.editingKey = saved.friendKey;
       state.group.selectedFriendKey = saved.friendKey;
       updateChrome();
-      showToast(`¡Porra de ${saved.friendName} guardada!`);
+      showToast(
+        isNew
+          ? `¡Porra de ${saved.friendName} guardada! Recuerda tu PIN (${pin}) para editarla.`
+          : `¡Porra de ${saved.friendName} actualizada!`
+      );
     } catch (err) {
       showToast(`Error al guardar: ${err.message}`, 'error');
     } finally {
@@ -1573,13 +1869,21 @@ window.__porraActions = {
 
   async removeEditingFriend() {
     if (!state.editor.editingKey || isDeadlinePassed()) return;
+    const pin = String(state.editor.pin || '').trim();
+    const editingPred = state.predictions.find(p => p.friendKey === state.editor.editingKey);
+    if (editingPred?.hasPin !== false && !/^\d{4}$/.test(pin)) {
+      showToast('Introduce el PIN de 4 dígitos de esta porra para poder eliminarla', 'warning');
+      return;
+    }
     const key = state.editor.editingKey;
     const name = state.editor.friendName;
     try {
-      await deletePrediction(state.backend, key);
+      await deletePrediction(state.backend, state.groupKey, key, pin);
       await refreshFromBackend();
       state.editor.editingKey = null;
       state.editor.friendName = '';
+      state.editor.pin = '';
+      state.editor.showPin = false;
       initEditorDefaults();
       updateChrome();
       renderApp();
@@ -1725,6 +2029,57 @@ window.__porraActions = {
         <div style="font-size:16px;font-weight:800;margin-top:4px;">Total: ${res.points} puntos</div>
       `;
     }
+  },
+
+  openGroupModal,
+  closeGroupModal,
+
+  selectGroupSlug(slug) {
+    switchActiveGroup(slug);
+  },
+
+  previewGroupInput(val) {
+    const el = document.getElementById('new-group-url-preview');
+    if (!el) return;
+    const gk = slugifyGroupKey(val || 'amigos');
+    el.textContent = `Enlace resultante: ${buildGroupShareUrl(gk)}`;
+  },
+
+  createGroupFromInput() {
+    const val = (document.getElementById('new-group-name-input')?.value || '').trim();
+    if (!val) {
+      showToast('Escribe un nombre para el grupo (ej. Familia, Amigos)', 'warning');
+      return;
+    }
+    switchActiveGroup(val);
+  },
+
+  async copyGroupLink() {
+    const url = buildGroupShareUrl(state.groupKey);
+    const ok = await copyTextToClipboard(url);
+    showToast(
+      ok
+        ? `Enlace del grupo "${formatGroupLabel(state.groupKey)}" copiado para compartir`
+        : `Copia este enlace manualmente: ${url}`,
+      ok ? 'success' : 'warning'
+    );
+  },
+
+  async copyCustomGroupLink() {
+    const val = (document.getElementById('new-group-name-input')?.value || '').trim();
+    if (!val) {
+      showToast('Escribe primero el nombre del nuevo grupo', 'warning');
+      return;
+    }
+    const gk = slugifyGroupKey(val);
+    const url = buildGroupShareUrl(gk);
+    const ok = await copyTextToClipboard(url);
+    showToast(
+      ok
+        ? `Enlace de "${formatGroupLabel(gk)}" copiado (${gk})`
+        : `Copia este enlace: ${url}`,
+      ok ? 'success' : 'warning'
+    );
   },
 
   openCloudModal,

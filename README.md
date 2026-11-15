@@ -4,7 +4,8 @@ Aplicación web móvil y escritorio para organizar una porra entre amigos sobre 
 
 ## Características incluidas
 
-- **Sin PIN:** cualquier amigo elige su nombre (o crea uno nuevo) y puede modificar su porra libremente hasta el **sábado 28 de noviembre de 2026 a las 23:59 (hora peninsular CET)**.
+- **Grupos separados por enlace (`?grupo=...`):** puedes tener porras independientes para distintos círculos (por ejemplo `?grupo=amigos`, `?grupo=familia`) o cambiar de grupo y copiar su enlace desde el botón **Grupo** en la cabecera. Los resultados oficiales del 29-N aplican a todos los grupos.
+- **Protección con PIN de 4 dígitos:** al guardar su predicción, cada participante crea un PIN numérico de 4 dígitos para impedir que otra persona la modifique o elimine (editable hasta el **sábado 28 de noviembre de 2026 a las 23:59, hora peninsular CET**).
 - **Base oficial 23-J (2023) y encuestas 29-N (2026):** candidaturas ordenadas por expectativa de representación en encuestas de noviembre de 2026 (incluyendo Adelante Andalucía, Compromís, SALF, Podemos, UPC, Ara Més, etc.) y opción para añadir cualquier otra candidatura del BOE.
 - **Comparativa en vivo:** tabla comparativa y vista individual con hemiciclo SVG de 350 escaños.
 - **Puntuación `+1 / -1` explicada:** `+1` por cada diputado acertado y `-1` por cada diputado de desviación, con sección explicativa y calculadora interactiva.

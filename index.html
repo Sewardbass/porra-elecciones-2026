@@ -29,11 +29,14 @@
           </div>
           <div>
             <h1 class="brand-title" id="header-title">Porra Elecciones España 2026</h1>
-            <p class="brand-sub" id="header-sub">29-N · Congreso de los Diputados (350 escaños) · Sin PIN</p>
+            <p class="brand-sub" id="header-sub">29-N · Congreso de los Diputados (350 escaños) · PIN 4 dígitos</p>
           </div>
         </div>
 
         <div class="header-meta">
+          <button id="btn-group-status" class="badge badge-primary" onclick="window.__porraActions.openGroupModal()" title="Cambiar de grupo o copiar enlace compartible">
+            <span>Grupo: <strong id="header-group-name">General</strong></span>
+          </button>
           <span id="deadline-badge" class="badge badge-primary tabular">Cierre: 28/11 23:59</span>
           <button id="btn-storage-status" class="badge" onclick="window.__porraActions.openCloudModal()" title="Configurar almacenamiento compartido gratuito">
             <span id="storage-dot" style="width:8px;height:8px;border-radius:999px;background:var(--muted);"></span>
@@ -85,6 +88,11 @@
       <span>Base 23-J</span>
     </button>
   </nav>
+
+  <!-- Modal de grupos separados y enlace compartible -->
+  <div id="group-modal" class="modal-backdrop hidden" onclick="if(event.target===this) window.__porraActions.closeGroupModal()">
+    <div class="modal-panel stack-md" id="group-modal-body"></div>
+  </div>
 
   <!-- Modal de configuración de nube gratuita (Supabase) -->
   <div id="cloud-modal" class="modal-backdrop hidden" onclick="if(event.target===this) window.__porraActions.closeCloudModal()">

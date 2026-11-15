@@ -7,18 +7,22 @@ de 350 escaños y bloqueo automático tras el sábado 28/11/2026 a las 23:59 CET
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import threading
+import unicodedata
 from datetime import datetime, timezone, timedelta
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DATA_FILE = BASE_DIR / "data" / "porra.json"
 DEFAULT_DEADLINE_ISO = "2026-11-28T23:59:59+01:00"
+DEFAULT_GROUP_KEY = "general"
 
 
 def parse_iso_dt(value: str) -> datetime:
@@ -26,6 +30,24 @@ def parse_iso_dt(value: str) -> datetime:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone(timedelta(hours=1)))
     return dt
+
+
+def normalize_group_key(raw: object) -> str:
+    txt = unicodedata.normalize("NFKD", str(raw or "")).encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^a-z0-9-]+", "-", txt.lower().strip()).strip("-")[:40]
+    return slug or DEFAULT_GROUP_KEY
+
+
+def validate_pin(raw: object) -> str:
+    pin = str(raw or "").strip()
+    if not re.fullmatch(r"\d{4}", pin):
+        raise ValueError("El PIN debe tener exactamente 4 dígitos numéricos.")
+    return pin
+
+
+def hash_pin(group_key: str, friend_key: str, pin: str) -> str:
+    raw = f"{group_key}:{friend_key}:{pin}".encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def validate_seats_map(seats: object) -> tuple[bool, str]:
@@ -74,25 +96,58 @@ class PorraStore:
         ref = now or datetime.now(timezone.utc)
         return ref > self.deadline
 
-    def get_state(self) -> dict:
+    @staticmethod
+    def _public_prediction(entry: dict) -> dict:
+        pub = {k: v for k, v in entry.items() if k != "pin_hash"}
+        pub["group_key"] = normalize_group_key(entry.get("group_key") or entry.get("groupKey"))
+        pub["has_pin"] = bool(entry.get("pin_hash") or entry.get("has_pin"))
+        return pub
+
+    def get_groups(self) -> list[str]:
         with self._lock:
-            return self._read_raw()
+            db = self._read_raw()
+        groups = {
+            normalize_group_key(p.get("group_key") or p.get("groupKey"))
+            for p in db.get("predictions", [])
+        }
+        groups.add(DEFAULT_GROUP_KEY)
+        return sorted(groups)
+
+    def get_state(self, group_key: str | None = None) -> dict:
+        gk = normalize_group_key(group_key)
+        with self._lock:
+            db = self._read_raw()
+        preds = [
+            self._public_prediction(p)
+            for p in db.get("predictions", [])
+            if normalize_group_key(p.get("group_key") or p.get("groupKey")) == gk
+        ]
+        return {
+            "groupKey": gk,
+            "predictions": preds,
+            "officialResults": db.get("officialResults"),
+        }
 
     def upsert_prediction(self, body: dict, now: datetime | None = None) -> dict:
         if self.is_closed(now):
             raise PermissionError("El plazo para modificar la porra cerró el 28/11/2026 a las 23:59.")
 
+        group_key = normalize_group_key(body.get("group_key") or body.get("groupKey"))
         friend_key = str(body.get("friend_key") or body.get("friendKey") or "").strip()
         friend_name = str(body.get("friend_name") or body.get("friendName") or "").strip()
         if not friend_key or not friend_name or len(friend_name) > 40:
             raise ValueError("Nombre o identificador de participante inválido.")
+
+        pin = validate_pin(body.get("pin"))
 
         seats = body.get("seats")
         ok, err = validate_seats_map(seats)
         if not ok:
             raise ValueError(err)
 
+        pin_digest = hash_pin(group_key, friend_key, pin)
         entry = {
+            "group_key": group_key,
             "friend_key": friend_key,
             "friend_name": friend_name,
             "seats": seats,
@@ -100,30 +155,64 @@ class PorraStore:
             "turnout": body.get("turnout"),
             "comment": str(body.get("comment") or "")[:200],
             "custom_parties": body.get("custom_parties") if isinstance(body.get("custom_parties"), list) else [],
+            "pin_hash": pin_digest,
             "updated_at": (now or datetime.now(timezone.utc)).isoformat(),
         }
 
         with self._lock:
             db = self._read_raw()
             preds = db.get("predictions", [])
-            idx = next((i for i, p in enumerate(preds) if p.get("friend_key") == friend_key), None)
+            idx = next(
+                (
+                    i for i, p in enumerate(preds)
+                    if p.get("friend_key") == friend_key
+                    and normalize_group_key(p.get("group_key") or p.get("groupKey")) == group_key
+                ),
+                None,
+            )
             if idx is not None:
+                existing_hash = preds[idx].get("pin_hash")
+                if existing_hash and existing_hash != pin_digest:
+                    raise PermissionError("PIN incorrecto. Solo quien creó esta porra puede modificarla.")
                 preds[idx] = entry
             else:
                 preds.insert(0, entry)
             db["predictions"] = preds
             self._write_raw(db)
-        return entry
+        return self._public_prediction(entry)
 
-    def delete_prediction(self, friend_key: str, now: datetime | None = None) -> bool:
+    def delete_prediction(
+        self,
+        friend_key: str,
+        group_key: str = DEFAULT_GROUP_KEY,
+        pin: str = "",
+        now: datetime | None = None,
+    ) -> bool:
         if self.is_closed(now):
             raise PermissionError("La porra ya está cerrada y no se pueden eliminar predicciones.")
+        gk = normalize_group_key(group_key)
         with self._lock:
             db = self._read_raw()
-            before = len(db.get("predictions", []))
-            db["predictions"] = [p for p in db.get("predictions", []) if p.get("friend_key") != friend_key]
+            preds = db.get("predictions", [])
+            idx = next(
+                (
+                    i for i, p in enumerate(preds)
+                    if p.get("friend_key") == friend_key
+                    and normalize_group_key(p.get("group_key") or p.get("groupKey")) == gk
+                ),
+                None,
+            )
+            if idx is None:
+                return False
+            existing_hash = preds[idx].get("pin_hash")
+            if existing_hash:
+                clean_pin = str(pin or "").strip()
+                if not re.fullmatch(r"\d{4}", clean_pin) or hash_pin(gk, friend_key, clean_pin) != existing_hash:
+                    raise PermissionError("PIN incorrecto. Introduce el PIN de 4 dígitos para eliminar esta porra.")
+            preds.pop(idx)
+            db["predictions"] = preds
             self._write_raw(db)
-            return len(db["predictions"]) < before
+            return True
 
     def set_official_results(self, body: dict) -> dict:
         code = str(body.get("adminCode") or "").strip()
@@ -162,13 +251,17 @@ def dispatch_api_request(store: PorraStore, method: str, path: str, raw_body: by
     parsed = urlparse(path)
     if not parsed.path.startswith("/api/"):
         return None
+    query = parse_qs(parsed.query)
+    query_group = (query.get("grupo") or query.get("group") or [DEFAULT_GROUP_KEY])[0]
 
     try:
         if method == "GET":
             if parsed.path == "/api/health":
                 return HTTPStatus.OK, {"ok": True, "closed": store.is_closed()}
+            if parsed.path == "/api/groups":
+                return HTTPStatus.OK, {"groups": store.get_groups()}
             if parsed.path == "/api/state":
-                return HTTPStatus.OK, store.get_state()
+                return HTTPStatus.OK, store.get_state(query_group)
             return HTTPStatus.NOT_FOUND, {"error": "Ruta no encontrada."}
 
         body = json.loads(raw_body.decode("utf-8")) if raw_body else {}
@@ -185,7 +278,9 @@ def dispatch_api_request(store: PorraStore, method: str, path: str, raw_body: by
         if method == "DELETE":
             if parsed.path.startswith("/api/predictions/"):
                 key = unquote(parsed.path.split("/api/predictions/", 1)[1])
-                store.delete_prediction(key)
+                gk = body.get("group_key") or body.get("groupKey") or query_group
+                pin = str(body.get("pin") or "")
+                store.delete_prediction(key, group_key=gk, pin=pin)
                 return HTTPStatus.OK, {"deleted": True}
             if parsed.path == "/api/results":
                 store.clear_official_results(body)

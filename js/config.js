@@ -14,7 +14,8 @@ window.PORRA_CONFIG = {
   SUPABASE_URL: 'https://fijefyeqcxxgzukazgku.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_zjKdqO8JMEu47_wolmbvFg_KbLGTXak',
 
-  // Nombre de la porra mostrado en cabecera
+  // Nombre de la porra mostrado en cabecera y grupo por defecto cuando no hay ?grupo=... en la URL
   POOL_TITLE: 'Porra Elecciones España 2026',
-  POOL_SUBTITLE: 'Congreso de los Diputados · 350 escaños'
+  POOL_SUBTITLE: 'Congreso de los Diputados · 350 escaños',
+  DEFAULT_GROUP: 'general'
 };

@@ -532,3 +532,23 @@ export function slugifyFriendKey(name) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || ('amigo-' + Date.now().toString(36));
 }
+
+export function slugifyGroupKey(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'general';
+}
+
+export function formatGroupLabel(groupKey) {
+  const clean = slugifyGroupKey(groupKey);
+  if (clean === 'general') return 'General';
+  return clean
+    .split('-')
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}

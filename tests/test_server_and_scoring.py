@@ -30,45 +30,117 @@ class TestPorraStore(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def test_upsert_and_edit_without_pin_before_deadline(self) -> None:
+    def test_upsert_edit_and_delete_with_pin_protection(self) -> None:
         before = datetime(2026, 11, 28, 23, 59, 59, tzinfo=CET)
+        with self.assertRaises(ValueError):
+            self.store.upsert_prediction(
+                {
+                    "group_key": "amigos",
+                    "friend_key": "lucia",
+                    "friend_name": "Lucía",
+                    "pin": "12",
+                    "seats": make_valid_seats(130, 120, 50, 25, 25),
+                },
+                now=before,
+            )
+
         self.store.upsert_prediction(
             {
+                "group_key": "amigos",
                 "friend_key": "lucia",
                 "friend_name": "Lucía",
+                "pin": "4821",
                 "seats": make_valid_seats(130, 120, 50, 25, 25),
                 "comment": "Primera versión",
             },
             now=before,
         )
-        # Editar sin PIN antes del cierre
+
+        # Rechazar edición y borrado con PIN incorrecto
+        with self.assertRaises(PermissionError):
+            self.store.upsert_prediction(
+                {
+                    "group_key": "amigos",
+                    "friend_key": "lucia",
+                    "friend_name": "Lucía",
+                    "pin": "9999",
+                    "seats": make_valid_seats(135, 115, 50, 25, 25),
+                },
+                now=before,
+            )
+        with self.assertRaises(PermissionError):
+            self.store.delete_prediction("lucia", group_key="amigos", pin="9999", now=before)
+
+        # Editar con el PIN correcto antes del cierre
         self.store.upsert_prediction(
             {
+                "group_key": "amigos",
                 "friend_key": "lucia",
                 "friend_name": "Lucía",
+                "pin": "4821",
                 "seats": make_valid_seats(135, 115, 50, 25, 25),
                 "comment": "Actualizada",
             },
             now=before,
         )
-        state = self.store.get_state()
+        state = self.store.get_state("amigos")
         self.assertEqual(len(state["predictions"]), 1)
         self.assertEqual(state["predictions"][0]["seats"]["pp"], 135)
         self.assertEqual(state["predictions"][0]["comment"], "Actualizada")
+        self.assertTrue(state["predictions"][0]["has_pin"])
+        self.assertNotIn("pin_hash", state["predictions"][0])
+
+    def test_group_isolation_separates_predictions(self) -> None:
+        before = datetime(2026, 11, 20, 12, 0, 0, tzinfo=CET)
+        self.store.upsert_prediction(
+            {
+                "group_key": "Amigos del Curro",
+                "friend_key": "alex",
+                "friend_name": "Alex",
+                "pin": "1111",
+                "seats": make_valid_seats(140, 110, 50, 25, 25),
+            },
+            now=before,
+        )
+        self.store.upsert_prediction(
+            {
+                "group_key": "Familia",
+                "friend_key": "alex",
+                "friend_name": "Alex",
+                "pin": "2222",
+                "seats": make_valid_seats(120, 130, 50, 25, 25),
+            },
+            now=before,
+        )
+
+        st_amigos = self.store.get_state("amigos-del-curro")
+        st_familia = self.store.get_state("familia")
+        self.assertEqual(len(st_amigos["predictions"]), 1)
+        self.assertEqual(len(st_familia["predictions"]), 1)
+        self.assertEqual(st_amigos["predictions"][0]["seats"]["pp"], 140)
+        self.assertEqual(st_familia["predictions"][0]["seats"]["pp"], 120)
+        self.assertIn("amigos-del-curro", self.store.get_groups())
+        self.assertIn("familia", self.store.get_groups())
+
+        self.assertTrue(self.store.delete_prediction("alex", group_key="amigos-del-curro", pin="1111", now=before))
+        self.assertEqual(len(self.store.get_state("amigos-del-curro")["predictions"]), 0)
+        self.assertEqual(len(self.store.get_state("familia")["predictions"]), 1)
 
     def test_deadline_locks_after_saturday_2359(self) -> None:
         after = datetime(2026, 11, 29, 0, 0, 0, tzinfo=CET)
         with self.assertRaises(PermissionError):
             self.store.upsert_prediction(
                 {
+                    "group_key": "general",
                     "friend_key": "carlos",
                     "friend_name": "Carlos",
+                    "pin": "1234",
                     "seats": make_valid_seats(),
                 },
                 now=after,
             )
         with self.assertRaises(PermissionError):
-            self.store.delete_prediction("lucia", now=after)
+            self.store.delete_prediction("lucia", group_key="general", pin="4821", now=after)
 
     def test_rejects_invalid_seat_totals_and_types(self) -> None:
         before = datetime(2026, 11, 20, 12, 0, 0, tzinfo=CET)
@@ -77,6 +149,7 @@ class TestPorraStore(unittest.TestCase):
                 {
                     "friend_key": "marta",
                     "friend_name": "Marta",
+                    "pin": "1234",
                     "seats": {"pp": 100, "psoe": 100},
                 },
                 now=before,
@@ -86,6 +159,7 @@ class TestPorraStore(unittest.TestCase):
                 {
                     "friend_key": "marta",
                     "friend_name": "Marta",
+                    "pin": "1234",
                     "seats": {"pp": True, "psoe": 349},
                 },
                 now=before,
@@ -138,20 +212,35 @@ class TestApiDispatchAndDataIntegrity(unittest.TestCase):
         status, _ = self._call(
             "POST",
             "/api/predictions",
-            {"friend_key": "alex", "friend_name": "Alex", "seats": make_valid_seats(140, 110, 50, 25, 25)},
+            {
+                "group_key": "familia",
+                "friend_key": "alex",
+                "friend_name": "Alex",
+                "pin": "4321",
+                "seats": make_valid_seats(140, 110, 50, 25, 25),
+            },
         )
         self.assertEqual(status, 200)
 
-        status, state = self._call("GET", "/api/state")
+        status, state_fam = self._call("GET", "/api/state?grupo=familia")
         self.assertEqual(status, 200)
-        self.assertEqual(len(state["predictions"]), 1)
-        self.assertEqual(state["predictions"][0]["friend_name"], "Alex")
+        self.assertEqual(len(state_fam["predictions"]), 1)
+        self.assertEqual(state_fam["predictions"][0]["friend_name"], "Alex")
+        self.assertNotIn("pin_hash", state_fam["predictions"][0])
+
+        status, state_gen = self._call("GET", "/api/state?grupo=general")
+        self.assertEqual(status, 200)
+        self.assertEqual(len(state_gen["predictions"]), 0)
+
+        status, groups_resp = self._call("GET", "/api/groups")
+        self.assertEqual(status, 200)
+        self.assertIn("familia", groups_resp["groups"])
 
         # Validación de error en servidor si no suma 350
         status, _ = self._call(
             "POST",
             "/api/predictions",
-            {"friend_key": "bad", "friend_name": "Bad", "seats": {"pp": 10}},
+            {"friend_key": "bad", "friend_name": "Bad", "pin": "1234", "seats": {"pp": 10}},
         )
         self.assertEqual(status, 400)
 
@@ -173,8 +262,10 @@ class TestApiDispatchAndDataIntegrity(unittest.TestCase):
         score = sum(min(pred[k], real[k]) - abs(pred[k] - real[k]) for k in real)
         self.assertEqual(score, 290)
 
-        # Eliminar predicción antes del cierre
-        status, _ = self._call("DELETE", "/api/predictions/alex")
+        # Borrado rechazado sin PIN correcto y permitido con PIN correcto
+        status, _ = self._call("DELETE", "/api/predictions/alex?grupo=familia", {"pin": "0000"})
+        self.assertEqual(status, 403)
+        status, _ = self._call("DELETE", "/api/predictions/alex?grupo=familia", {"pin": "4321"})
         self.assertEqual(status, 200)
 
     def test_23j_baseline_sums_to_350_and_includes_adelante_andalucia(self) -> None:
@@ -216,6 +307,10 @@ class TestApiDispatchAndDataIntegrity(unittest.TestCase):
         self.assertIn(r"/\/rest\/v1$/i", storage_js)
         config_js = (BASE_DIR / "js" / "config.js").read_text(encoding="utf-8")
         self.assertNotRegex(config_js, r"SUPABASE_URL:\s*'[^']*/rest/v1/?'")
+
+        schema_sql = (BASE_DIR / "supabase_schema.sql").read_text(encoding="utf-8")
+        for token in ("group_key", "prediction_pins", "save_prediction", "delete_prediction", "CAMBIA-ESTE-CODIGO"):
+            self.assertIn(token, schema_sql)
 
 
 if __name__ == "__main__":

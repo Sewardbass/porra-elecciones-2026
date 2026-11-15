@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup · Porra Elecciones España 2026 (29-N)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] { -moz-appearance: textfield; }
+    .pill-success {
+      background-color: var(--content);
+      background-color: color-mix(in srgb, var(--success) 15%, transparent);
+      color: var(--success);
+      border-color: var(--success);
+    }
+    .pill-warning {
+      background-color: var(--content);
+      background-color: color-mix(in srgb, var(--warning) 15%, transparent);
+      color: var(--warning);
+      border-color: var(--warning);
+    }
+    .pill-error {
+      background-color: var(--content);
+      background-color: color-mix(in srgb, var(--error) 15%, transparent);
+      color: var(--error);
+      border-color: var(--error);
+    }
+    .pill-primary {
+      background-color: var(--content);
+      background-color: color-mix(in srgb, var(--primary) 15%, transparent);
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0 min-h-screen">
+
+  <!-- Barra superior de control del Mockup -->
+  <div class="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--sidebar)] px-4 py-2.5">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+          MOCKUP INTERACTIVO
+        </span>
+        <span class="text-xs text-[var(--muted-foreground)]">
+          Simulación visual y funcional · Datos de amigos y escrutinio ficticios de ejemplo
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="inline-flex rounded-lg border border-[var(--border)] bg-[var(--card)] p-0.5 text-xs">
+          <button id="btn-view-desktop" onclick="setViewport('desktop')"
+            class="px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            PC
+          </button>
+          <button id="btn-view-mobile" onclick="setViewport('mobile')"
+            class="px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+            Móvil
+          </button>
+        </div>
+        <button onclick="resetDemo()"
+          class="px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)] text-xs font-medium text-[var(--foreground)] transition-colors">
+          Reiniciar demo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor principal (cambia entre ancho PC y marco Móvil de 390px) -->
+  <div id="stage-wrapper" class="py-4 px-2 sm:px-4 flex justify-center">
+    <div id="app-shell" class="w-full max-w-6xl transition-all duration-200">
+      <!-- Barra superior de la app -->
+      <header id="app-header" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 20h16M6 16V10a6 6 0 0 1 12 0v6M9 16v-3a3 3 0 0 1 6 0v3"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h1 class="text-base sm:text-lg font-bold tracking-tight">Porra Elecciones España 2026</h1>
+                <span class="text-xs px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--content)] text-[var(--muted-foreground)] font-medium">
+                  29-N · Congreso (350)
+                </span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)]">
+                Base oficial 23-J (2023) · Todos los partidos del BOE · Ranking automático
+              </p>
+            </div>
+          </div>
+
+          <!-- Navegación Desktop -->
+          <nav id="desktop-nav" class="flex items-center gap-1.5 bg-[var(--content)] p-1 rounded-xl border border-[var(--border)]">
+            <button data-tab="predict" onclick="switchTab('predict')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+              Mi Porra
+            </button>
+            <button data-tab="group" onclick="switchTab('group')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+              Ver Todas (<span class="friends-count">5</span>)
+            </button>
+            <button data-tab="ranking" onclick="switchTab('ranking')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+              Resultados y Ranking
+            </button>
+            <button data-tab="base" onclick="switchTab('base')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+              Base 23-J
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Área de contenido de las vistas -->
+      <main id="main-content" class="space-y-4"></main>
+
+      <!-- Navegación inferior para modo Móvil -->
+      <nav id="mobile-nav" class="hidden sticky bottom-0 z-30 mt-4 bg-[var(--card)] border-t border-[var(--border)] px-2 py-2 grid grid-cols-4 gap-1 rounded-b-2xl">
+        <button data-tab="predict" onclick="switchTab('predict')" class="mnav-btn flex flex-col items-center gap-1 py-1.5 rounded-lg text-xs font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span>Mi Porra</span>
+        </button>
+        <button data-tab="group" onclick="switchTab('group')" class="mnav-btn flex flex-col items-center gap-1 py-1.5 rounded-lg text-xs font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Grupo (<span class="friends-count">5</span>)</span>
+        </button>
+        <button data-tab="ranking" onclick="switchTab('ranking')" class="mnav-btn flex flex-col items-center gap-1 py-1.5 rounded-lg text-xs font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span>Ranking</span>
+        </button>
+        <button data-tab="base" onclick="switchTab('base')" class="mnav-btn flex flex-col items-center gap-1 py-1.5 rounded-lg text-xs font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
+          <span>Base 23-J</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Toast de notificación -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-lg text-xs font-medium">
+    <span id="toast-dot" class="w-2 h-2 rounded-full bg-[var(--success)]"></span>
+    <span id="toast-msg"></span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // DATOS BASE OFICIALES 23-J (2023) Y CANDIDATURAS 29-N (2026)
+    // Fuentes: Junta Electoral Central / BOE (23-J 2023 y BOE núm. 273 de 2026)
+    // =========================================================================
+    const BASE_PARTIES = [
+      // Partidos con representación en el 23-J o principales fuerzas 29-N
+      { id: 'pp', abbr: 'PP', name: 'Partido Popular', color: '#1D84CE', scope: 'Estatal (52 circ.)', seats23: 137, pct23: 33.06, votes23: 8160837, cat: 'rep23', note26: 'Concurre en toda España (acuerdos territoriales como UPN en Navarra).' },
+      { id: 'psoe', abbr: 'PSOE', name: 'Partido Socialista Obrero Español', color: '#E31E24', scope: 'Estatal (52 circ.)', seats23: 121, pct23: 31.68, votes23: 7821718, cat: 'rep23', note26: 'Concurre en las 52 circunscripciones (PSC en Cataluña).' },
+      { id: 'vox', abbr: 'Vox', name: 'Vox', color: '#63BE21', scope: 'Estatal (52 circ.)', seats23: 33, pct23: 12.38, votes23: 3057000, cat: 'rep23', note26: 'Concurre en solitario en las 52 circunscripciones al Congreso.' },
+      { id: 'fa', abbr: 'Frente Amplio', name: 'Frente Amplio (Sumar / IU / Más Madrid / Comuns)', color: '#E51C6B', scope: 'Estatal (46 circ.)', seats23: 31, pct23: 12.33, votes23: 3044996, cat: 'rep23', note26: 'En 2023 concurrió como Sumar (31 esc. junto a Podemos y territoriales).' },
+      { id: 'podemos', abbr: 'Podemos', name: 'Podemos', color: '#7B3FA0', scope: 'Estatal (41 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'En 2023 fue dentro de Sumar; en el 29-N 2026 concurre por separado.' },
+      { id: 'salf', abbr: 'SALF', name: 'Se Acabó La Fiesta', color: '#8A5A2B', scope: 'Estatal (46 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'No se presentó en las generales de 2023. Proclamado en 46 circ. en 2026.' },
+      { id: 'erc', abbr: 'ERC', name: 'Esquerra Republicana de Catalunya', color: '#FFB232', scope: 'Cataluña (4 circ.)', seats23: 7, pct23: 1.89, votes23: 466020, cat: 'rep23', note26: 'Concurre en Barcelona, Girona, Lleida y Tarragona.' },
+      { id: 'junts', abbr: 'Junts', name: 'Junts per Catalunya', color: '#00C3B2', scope: 'Cataluña (4 circ.)', seats23: 7, pct23: 1.60, votes23: 395429, cat: 'rep23', note26: 'Concurre en las 4 circunscripciones catalanas.' },
+      { id: 'bildu', abbr: 'EH Bildu', name: 'Euskal Herria Bildu', color: '#A3C936', scope: 'País Vasco y Navarra', seats23: 6, pct23: 1.36, votes23: 335129, cat: 'rep23', note26: 'Concurre en Álava, Bizkaia, Gipuzkoa y Navarra.' },
+      { id: 'pnv', abbr: 'EAJ-PNV', name: 'Partido Nacionalista Vasco', color: '#008A45', scope: 'País Vasco y Navarra', seats23: 5, pct23: 1.12, votes23: 277289, cat: 'rep23', note26: 'Concurre en las circunscripciones vascas.' },
+      { id: 'bng', abbr: 'BNG', name: 'Bloque Nacionalista Galego', color: '#76B3DD', scope: 'Galicia (4 circ.)', seats23: 1, pct23: 0.62, votes23: 153995, cat: 'rep23', note26: 'Concurre en A Coruña, Lugo, Ourense y Pontevedra.' },
+      { id: 'cca', abbr: 'CCa', name: 'Coalición Canaria', color: '#FFD100', scope: 'Canarias (2 circ.)', seats23: 1, pct23: 0.47, votes23: 116363, cat: 'rep23', note26: 'Concurre en Las Palmas y Santa Cruz de Tenerife.' },
+      { id: 'upn', abbr: 'UPN', name: 'Unión del Pueblo Navarro', color: '#2B5B9E', scope: 'Navarra (1 circ.)', seats23: 1, pct23: 0.21, votes23: 52188, cat: 'rep23', note26: 'Circunscripción de Navarra.' },
+
+      // Partidos sin representación en el 23-J / autonómicos / extraparlamentarios
+      { id: 'pacma', abbr: 'PACMA', name: 'Partido Animalista Con el Medio Ambiente', color: '#8DC63F', scope: 'Estatal (~30-37 circ.)', seats23: 0, pct23: 0.69, votes23: 169237, cat: 'extra26', note26: 'Fuerza extraparlamentaria más votada en 2023.' },
+      { id: 'ac', abbr: 'Aliança Cat.', name: 'Aliança Catalana', color: '#1E40AF', scope: 'Cataluña (4 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'Nueva candidatura en elecciones generales en circunscripciones catalanas.' },
+      { id: 'compromis', abbr: 'Compromís', name: 'Compromís - Front Valencià', color: '#F97316', scope: 'Com. Valenciana (3 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'En 2023 integrado en Sumar; lista territorial propia/confluencia en 2026.' },
+      { id: 'cup', abbr: 'CUP-PR', name: 'Candidatura d\'Unitat Popular', color: '#F59E0B', scope: 'Cataluña', seats23: 0, pct23: 0.40, votes23: 98794, cat: 'extra26', note26: 'Sin escaños en el 23-J de 2023.' },
+      { id: 'fo', abbr: 'Frente Obrero', name: 'Frente Obrero', color: '#991B1B', scope: 'Estatal (52 circ.)', seats23: 0, pct23: 0.19, votes23: 46605, cat: 'extra26', note26: 'Presente en las 52 circunscripciones al Congreso en el 29-N.' },
+      { id: 'nc', abbr: 'NC-bc', name: 'Nueva Canarias - Bloque Canarista', color: '#10B981', scope: 'Canarias (2 circ.)', seats23: 0, pct23: 0.18, votes23: 45557, cat: 'extra26', note26: 'Circunscripciones de Canarias.' },
+      { id: 'te', abbr: 'Teruel Existe', name: 'Teruel Existe', color: '#059669', scope: 'Teruel (1 circ.)', seats23: 0, pct23: 0.08, votes23: 20298, cat: 'extra26', note26: 'España Vaciada / Teruel.' },
+      { id: 'eb', abbr: 'Escaños en Blanco', name: 'Escaños en Blanco', color: '#94A3B8', scope: 'Varias circ.', seats23: 0, pct23: 0.03, votes23: 8287, cat: 'extra26', note26: 'Propone dejar vacíos los escaños obtenidos.' },
+      { id: 'pcte', abbr: 'PCTE', name: 'Partido Comunista de los Trabajadores de España', color: '#B91C1C', scope: 'Estatal (39 circ.)', seats23: 0, pct23: 0.07, votes23: 17918, cat: 'extra26', note26: 'Concurre en 39 circunscripciones al Congreso.' },
+      { id: 'upl', abbr: 'UPL', name: 'Unión del Pueblo Leonés', color: '#A855F7', scope: 'León / Castilla y León', seats23: 0, pct23: 0.09, votes23: 23010, cat: 'extra26', note26: 'Ámbito leonés.' },
+      { id: 'rcero', abbr: 'Recortes Cero', name: 'Recortes Cero', color: '#0D9488', scope: 'Varias circ.', seats23: 0, pct23: 0.09, votes23: 23254, cat: 'extra26', note26: 'Sin escaños en 2023.' },
+      { id: 'pumj', abbr: 'PUM+J', name: 'Por Un Mundo Más Justo', color: '#38BDF8', scope: 'Varias circ.', seats23: 0, pct23: 0.09, votes23: 22391, cat: 'extra26', note26: 'Sin escaños en 2023.' }
+    ];
+
+    // Catálogo adicional de otras listas que pueden añadirse desde el buscador BOE
+    const EXTRA_BOE_CATALOG = [
+      { id: 'soria', abbr: 'Soria ¡Ya!', name: 'Soria ¡Ya!', color: '#D97706', scope: 'Soria (1 circ.)', seats23: 0, pct23: 0.03, votes23: 9626, cat: 'extra26', note26: 'Movimiento ciudadano de Soria.' },
+      { id: 'cha', abbr: 'CHA', name: 'Chunta Aragonesista', color: '#EA580C', scope: 'Aragón (3 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'En 2023 en Sumar; confluencia/lista aragonesa.' },
+      { id: 'mes', abbr: 'Més', name: 'Més per Mallorca / Ara Més', color: '#16A34A', scope: 'Illes Balears', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'Ámbito balear.' },
+      { id: 'gbai', abbr: 'Geroa Bai', name: 'Geroa Bai', color: '#EF4444', scope: 'Navarra', seats23: 0, pct23: 0.04, votes23: 9839, cat: 'extra26', note26: 'Circunscripción de Navarra.' },
+      { id: 'adelante', abbr: 'Adelante And.', name: 'Adelante Andalucía', color: '#15803D', scope: 'Andalucía', seats23: 0, pct23: 0.03, votes23: 9064, cat: 'extra26', note26: 'Ámbito andaluz.' },
+      { id: 'cs', abbr: 'CS', name: 'Ciudadanos', color: '#FB923C', scope: 'Varias circ.', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'No se presentó en el 23-J 2023.' },
+      { id: 'fejons', abbr: 'FE de las JONS', name: 'Falange Española de las JONS', color: '#52525B', scope: 'Varias circ.', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'Candidatura extraparlamentaria.' },
+      { id: 'volt', abbr: 'Volt', name: 'Volt España', color: '#6D28D9', scope: 'Varias circ.', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'Partido paneuropeo.' },
+      { id: 'jaen', abbr: 'JM+', name: 'Jaén Merece Más', color: '#0284C7', scope: 'Jaén (1 circ.)', seats23: 0, pct23: 0, votes23: 0, cat: 'extra26', note26: 'Ámbito provincial de Jaén.' }
+    ];
+
+    // =========================================================================
+    // ESTADO INICIAL DEL MOCKUP (PREDICCIONES DE EJEMPLO QUE SUMAN 350 ESCAÑOS)
+    // =========================================================================
+    const INITIAL_FRIENDS = [
+      {
+        id: 'lucia',
+        name: 'Lucía',
+        updatedAt: 'Hoy, 12:14',
+        turnout: 71.2,
+        comment: 'Creo que habrá subida de participación y mucha fragmentación en bloques.',
+        seats: { pp: 142, psoe: 112, vox: 38, fa: 21, podemos: 5, salf: 4, erc: 6, junts: 7, bildu: 6, pnv: 5, bng: 2, cca: 1, upn: 1 },
+        pct:   { pp: 34.2, psoe: 28.9, vox: 13.8, fa: 8.6, podemos: 4.1, salf: 3.1, erc: 1.7, junts: 1.6, bildu: 1.4, pnv: 1.1, bng: 0.8, cca: 0.4, upn: 0.2, pacma: 0.8, fo: 0.3 }
+      },
+      {
+        id: 'carlos',
+        name: 'Carlos',
+        updatedAt: 'Hoy, 11:05',
+        turnout: 68.5,
+        comment: 'Apuesto por resultado muy apretado y que Teruel Existe recupera escaño.',
+        seats: { pp: 134, psoe: 124, vox: 31, fa: 25, podemos: 6, salf: 2, erc: 7, junts: 6, bildu: 6, pnv: 5, bng: 1, cca: 1, upn: 1, te: 1 },
+        pct:   { pp: 32.5, psoe: 31.4, vox: 11.9, fa: 9.8, podemos: 4.4, salf: 2.3, erc: 1.9, junts: 1.5, bildu: 1.4, pnv: 1.1, bng: 0.6, cca: 0.5, upn: 0.2, te: 0.1, pacma: 0.7 }
+      },
+      {
+        id: 'marta',
+        name: 'Marta',
+        updatedAt: 'Ayer, 21:40',
+        turnout: 72.0,
+        comment: 'Mi apuesta arriesgada: Aliança Catalana entra con 2 y SALF saca 5.',
+        seats: { pp: 148, psoe: 105, vox: 41, fa: 19, podemos: 4, salf: 5, erc: 6, junts: 6, bildu: 7, pnv: 4, bng: 1, cca: 1, upn: 1, ac: 2 },
+        pct:   { pp: 35.1, psoe: 27.4, vox: 14.5, fa: 7.9, podemos: 3.5, salf: 3.4, erc: 1.6, junts: 1.4, bildu: 1.5, pnv: 1.0, bng: 0.6, cca: 0.4, upn: 0.2, ac: 0.9, pacma: 0.6 }
+      },
+      {
+        id: 'javi',
+        name: 'Javi',
+        updatedAt: 'Ayer, 19:22',
+        turnout: 69.8,
+        comment: 'PSOE aguanta como primera fuerza por poco y Nueva Canarias saca 1.',
+        seats: { pp: 128, psoe: 129, vox: 29, fa: 27, podemos: 7, salf: 1, erc: 7, junts: 6, bildu: 6, pnv: 5, bng: 2, cca: 1, upn: 1, nc: 1 },
+        pct:   { pp: 31.1, psoe: 32.8, vox: 11.2, fa: 10.4, podemos: 4.9, salf: 1.9, erc: 1.9, junts: 1.5, bildu: 1.3, pnv: 1.1, bng: 0.8, cca: 0.4, upn: 0.2, nc: 0.3, pacma: 0.7 }
+      },
+      {
+        id: 'elena',
+        name: 'Elena',
+        updatedAt: 'Hace 2 días',
+        turnout: 70.5,
+        comment: 'Meto a PACMA con 1 escaño por Madrid/Barcelona como sorpresa de la porra.',
+        seats: { pp: 138, psoe: 118, vox: 35, fa: 22, podemos: 4, salf: 3, erc: 7, junts: 7, bildu: 6, pnv: 5, bng: 1, cca: 1, upn: 1, ac: 1, pacma: 1 },
+        pct:   { pp: 33.4, psoe: 30.2, vox: 13.0, fa: 8.8, podemos: 3.6, salf: 2.6, erc: 1.8, junts: 1.6, bildu: 1.4, pnv: 1.1, bng: 0.6, cca: 0.5, upn: 0.2, ac: 0.5, pacma: 1.4 }
+      }
+    ];
+
+    // Resultados ficticios para demostrar el Ranking tras las elecciones (suman 350 exactos)
+    const DEMO_OFFICIAL_RESULTS = {
+      turnout: 70.8,
+      seats: { pp: 140, psoe: 116, vox: 36, fa: 22, podemos: 5, salf: 3, erc: 7, junts: 6, bildu: 6, pnv: 5, bng: 1, cca: 1, upn: 1, ac: 1 },
+      pct:   { pp: 33.8, psoe: 29.7, vox: 13.2, fa: 8.9, podemos: 4.0, salf: 2.7, erc: 1.8, junts: 1.5, bildu: 1.4, pnv: 1.1, bng: 0.6, cca: 0.5, upn: 0.2, ac: 0.6, pacma: 0.8, fo: 0.2 }
+    };
+
+    // Estado vivo de la aplicación
+    let state = {
+      viewport: 'desktop', // 'desktop' | 'mobile'
+      activeTab: 'predict', // 'predict' | 'group' | 'ranking' | 'base'
+      parties: JSON.parse(JSON.stringify(BASE_PARTIES)),
+      friends: JSON.parse(JSON.stringify(INITIAL_FRIENDS)),
+      editor: {
+        name: 'Alex',
+        pin: '2026',
+        turnout: 70.4,
+        comment: '',
+        filterCat: 'all', // 'all' | 'rep23' | 'extra26' | 'picked'
+        search: '',
+        showCatalogDrawer: false,
+        seats: {},
+        pct: {}
+      },
+      groupViewMode: 'table', // 'table' | 'cards'
+      groupSelectedFriendId: 'lucia',
+      groupOnlyActiveParties: true,
+      resultsLoaded: false,
+      officialResults: JSON.parse(JSON.stringify(DEMO_OFFICIAL_RESULTS)),
+      editingOfficial: false,
+      scoringMode: 'mae', // 'mae' | 'mixed' | 'classic'
+      expandedRankFriendId: null
+    };
+
+    // Inicializar predicción del editor partiendo de una copia limpia del 23-J
+    function initEditorFrom23J() {
+      state.editor.seats = {};
+      state.editor.pct = {};
+      state.parties.forEach(p => {
+        state.editor.seats[p.id] = p.seats23 || 0;
+        state.editor.pct[p.id] = p.pct23 || 0;
+      });
+    }
+    initEditorFrom23J();
+
+    // =========================================================================
+    // UTILIDADES
+    // =========================================================================
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getTotalSeats(seatsMap) {
+      return Object.values(seatsMap).reduce((sum, v) => sum + (parseInt(v, 10) || 0), 0);
+    }
+
+    function getTotalPct(pctMap) {
+      return Object.values(pctMap).reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+    }
+
+    function showToast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toast-dot');
+      const text = document.getElementById('toast-msg');
+      text.textContent = msg;
+      dot.className = 'w-2 h-2 rounded-full ' + (
+        type === 'warning' ? 'bg-[var(--warning)]' :
+        type === 'error' ? 'bg-[var(--error)]' : 'bg-[var(--success)]'
+      );
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }, 3000);
+    }
+
+    // Genera un hemiciclo SVG de 350 puntos reales en 7 arcos concéntricos
+    function renderHemicycleSVG(seatsMap) {
+      const radii = [56, 68, 80, 92, 104, 116, 128];
+      const counts = [30, 37, 44, 50, 57, 63, 69]; // suma = 350
+      const cx = 160;
+      const cy = 148;
+      const dots = [];
+
+      for (let rIdx = 0; rIdx < radii.length; rIdx++) {
+        const r = radii[rIdx];
+        const n = counts[rIdx];
+        for (let i = 0; i < n; i++) {
+          const t = n === 1 ? 0.5 : i / (n - 1);
+          const angle = Math.PI * (1 - t); // izquierda (pi) -> derecha (0)
+          dots.push({
+            angle,
+            r,
+            x: cx + r * Math.cos(angle),
+            y: cy - r * Math.sin(angle)
+          });
+        }
+      }
+
+      // Ordenar por ángulo descendente (izquierda a derecha) para formar sectores limpios
+      dots.sort((a, b) => b.angle - a.angle || a.r - b.r);
+
+      // Construir lista de colores hasta 350 escaños
+      const seatColors = [];
+      const activeParties = state.parties
+        .map(p => ({ party: p, seats: parseInt(seatsMap[p.id] || 0, 10) }))
+        .filter(x => x.seats > 0)
+        .sort((a, b) => b.seats - a.seats);
+
+      activeParties.forEach(item => {
+        for (let k = 0; k < item.seats && seatColors.length < 350; k++) {
+          seatColors.push({ color: item.party.color, title: item.party.abbr });
+        }
+      });
+
+      const circles = dots.map((d, idx) => {
+        const assigned = seatColors[idx];
+        const fill = assigned ? assigned.color : 'var(--border)';
+        const opacity = assigned ? '1' : '0.45';
+        return `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="3.4" fill="${fill}" fill-opacity="${opacity}"><title>${assigned ? escapeHtml(assigned.title) : 'Sin asignar'}</title></circle>`;
+      }).join('');
+
+      const total = getTotalSeats(seatsMap);
+      return `
+        <div class="flex flex-col items-center">
+          <svg viewBox="0 0 320 165" class="w-full max-w-[340px] overflow-visible">
+            ${circles}
+            <line x1="160" y1="12" x2="160" y2="152" stroke="var(--muted-foreground)" stroke-width="1.2" stroke-dasharray="3 3" />
+            <text x="160" y="9" text-anchor="middle" fill="var(--muted-foreground)" font-size="9" font-weight="600">176 (Mayoría)</text>
+            <text x="160" y="138" text-anchor="middle" fill="var(--foreground)" font-size="18" font-weight="700" class="tabular-nums">${total}</text>
+            <text x="160" y="152" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">de 350 escaños</text>
+          </svg>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // MOTOR DE PUNTUACIÓN Y RANKING
+    // =========================================================================
+    function evaluateFriend(friend, official, mode) {
+      let absSeatErr = 0;
+      let absPctErr = 0;
+      let exactHits = 0;
+      let classicPts = 0;
+      let bestParty = null;
+      let worstParty = null;
+      const breakdown = [];
+
+      // Comparar en todos los partidos conocidos o donde haya predicción/resultado
+      const allIds = new Set([
+        ...state.parties.map(p => p.id),
+        ...Object.keys(friend.seats || {}),
+        ...Object.keys(official.seats || {})
+      ]);
+
+      allIds.forEach(id => {
+        const p = state.parties.find(x => x.id === id) || { id, abbr: id.toUpperCase(), name: id, color: '#64748B' };
+        const predS = parseInt(friend.seats?.[id] || 0, 10);
+        const realS = parseInt(official.seats?.[id] || 0, 10);
+        const predP = parseFloat(friend.pct?.[id] || 0);
+        const realP = parseFloat(official.pct?.[id] || 0);
+
+        if (predS === 0 && realS === 0 && predP === 0 && realP === 0) return;
+
+        const diffS = predS - realS;
+        const errS = Math.abs(diffS);
+        const errP = Math.abs(predP - realP);
+
+        absSeatErr += errS;
+        absPctErr += errP;
+
+        if (predS === realS && (realS > 0 || predP > 0)) {
+          exactHits++;
+        }
+
+        // Puntos para modo clásico (por partido con representación o predicho)
+        let partyPts = 0;
+        if (realS > 0 || predS > 0) {
+          if (errS === 0) partyPts = 25;
+          else if (errS <= 2) partyPts = 15;
+          else if (errS <= 5) partyPts = 8;
+          else partyPts = Math.max(-10, 5 - errS);
+        } else {
+          // Partidos sin escaños: premiar cercanía en % de voto
+          if (errP <= 0.3) partyPts = 6;
+          else if (errP <= 0.8) partyPts = 3;
+        }
+        classicPts += partyPts;
+
+        breakdown.push({ party: p, predS, realS, diffS, errS, predP, realP, errP, partyPts });
+
+        if ((realS >= 3 || predS >= 3)) {
+          if (!bestParty || errS < bestParty.errS || (errS === bestParty.errS && realS > bestParty.realS)) {
+            bestParty = { abbr: p.abbr, errS, predS, realS };
+          }
+          if (!worstParty || errS > worstParty.errS) {
+            worstParty = { abbr: p.abbr, errS, predS, realS };
+          }
+        }
+      });
+
+      // Bonus por acertar ganador en modo clásico
+      const predWinner = Object.entries(friend.seats).sort((a, b) => b[1] - a[1])[0]?.[0];
+      const realWinner = Object.entries(official.seats).sort((a, b) => b[1] - a[1])[0]?.[0];
+      const winnerBonus = predWinner && predWinner === realWinner ? 25 : 0;
+
+      let score = 0;
+      let scoreLabel = '';
+      if (mode === 'mae') {
+        score = Math.max(0, 1000 - absSeatErr * 8);
+        scoreLabel = `${score} pts`;
+      } else if (mode === 'mixed') {
+        const penalty = absSeatErr * 5 + absPctErr * 10;
+        score = Math.max(0, Math.round(1000 - penalty));
+        scoreLabel = `${score} pts`;
+      } else {
+        score = classicPts + winnerBonus;
+        scoreLabel = `${score} pts`;
+      }
+
+      breakdown.sort((a, b) => b.realS - a.realS || b.predS - a.predS || b.realP - a.realP);
+
+      return {
+        friend,
+        score,
+        scoreLabel,
+        absSeatErr,
+        absPctErr: absPctErr.toFixed(1),
+        exactHits,
+        winnerHit: predWinner === realWinner,
+        bestParty,
+        worstParty,
+        breakdown
+      };
+    }
+
+    function computeRanking() {
+      return state.friends
+        .map(f => evaluateFriend(f, state.officialResults, state.scoringMode))
+        .sort((a, b) => b.score - a.score || a.absSeatErr - b.absSeatErr);
+    }
+
+    // =========================================================================
+    // ACCIONES DEL USUARIO EN EL MOCKUP
+    // =========================================================================
+    function setViewport(vp) {
+      state.viewport = vp;
+      renderChrome();
+      renderMain();
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      renderChrome();
+      renderMain();
+    }
+
+    function resetDemo() {
+      state.parties = JSON.parse(JSON.stringify(BASE_PARTIES));
+      state.friends = JSON.parse(JSON.stringify(INITIAL_FRIENDS));
+      state.resultsLoaded = false;
+      state.officialResults = JSON.parse(JSON.stringify(DEMO_OFFICIAL_RESULTS));
+      state.editingOfficial = false;
+      state.editor.name = 'Alex';
+      state.editor.pin = '2026';
+      state.editor.comment = '';
+      initEditorFrom23J();
+      renderChrome();
+      renderMain();
+      showToast('Demo reiniciada al estado inicial');
+    }
+
+    function adjustSeat(partyId, delta) {
+      const curr = parseInt(state.editor.seats[partyId] || 0, 10);
+      const next = Math.max(0, Math.min(350, curr + delta));
+      state.editor.seats[partyId] = next;
+      // Actualizar solo los elementos necesarios o re-render ligero manteniendo foco
+      updateEditorCountersAndHemicycle();
+      const input = document.getElementById(`seat-input-${partyId}`);
+      if (input) input.value = next;
+    }
+
+    function setSeatDirect(partyId, val) {
+      let num = parseInt(val, 10);
+      if (isNaN(num) || num < 0) num = 0;
+      if (num > 350) num = 350;
+      state.editor.seats[partyId] = num;
+      updateEditorCountersAndHemicycle();
+    }
+
+    function setPctDirect(partyId, val) {
+      let num = parseFloat(val);
+      if (isNaN(num) || num < 0) num = 0;
+      if (num > 100) num = 100;
+      state.editor.pct[partyId] = num;
+      updateEditorCountersAndHemicycle();
+    }
+
+    function updateEditorCountersAndHemicycle() {
+      const total = getTotalSeats(state.editor.seats);
+      const totalPct = getTotalPct(state.editor.pct).toFixed(1);
+      const diff = 350 - total;
+
+      const hemiContainer = document.getElementById('editor-hemicycle');
+      if (hemiContainer) hemiContainer.innerHTML = renderHemicycleSVG(state.editor.seats);
+
+      const badge = document.getElementById('editor-seats-badge');
+      if (badge) {
+        if (diff === 0) {
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold border tabular-nums pill-success';
+          badge.textContent = '350 / 350 · ¡Cuadra exacto!';
+        } else if (diff > 0) {
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold border tabular-nums pill-warning';
+          badge.textContent = `${total} / 350 · Faltan ${diff}`;
+        } else {
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold border tabular-nums pill-error';
+          badge.textContent = `${total} / 350 · Sobran ${Math.abs(diff)}`;
+        }
+      }
+
+      const pctEl = document.getElementById('editor-pct-readout');
+      if (pctEl) pctEl.textContent = `${totalPct}% sumado`;
+    }
+
+    function copy23JToEditor() {
+      initEditorFrom23J();
+      renderMain();
+      showToast('Base oficial 23-J cargada en tu borrador');
+    }
+
+    function zeroOutEditor() {
+      state.parties.forEach(p => {
+        state.editor.seats[p.id] = 0;
+        state.editor.pct[p.id] = 0;
+      });
+      renderMain();
+      showToast('Todos los escaños puestos a 0', 'warning');
+    }
+
+    function addExtraParty(extraId) {
+      const found = EXTRA_BOE_CATALOG.find(x => x.id === extraId);
+      if (!found) return;
+      if (!state.parties.some(p => p.id === found.id)) {
+        state.parties.push(JSON.parse(JSON.stringify(found)));
+        state.editor.seats[found.id] = 0;
+        state.editor.pct[found.id] = found.pct23 || 0;
+      }
+      state.editor.showCatalogDrawer = false;
+      renderMain();
+      showToast(`${found.abbr} añadido a la lista de predicción`);
+    }
+
+    function addCustomParty() {
+      const nameInput = document.getElementById('custom-party-name');
+      const scopeInput = document.getElementById('custom-party-scope');
+      const rawName = (nameInput?.value || '').trim();
+      const rawScope = (scopeInput?.value || '').trim() || 'Circunscripción propia';
+      if (!rawName) {
+        showToast('Escribe el nombre o siglas del partido', 'warning');
+        return;
+      }
+      const id = 'custom_' + rawName.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '_' + Date.now().toString().slice(-3);
+      state.parties.push({
+        id,
+        abbr: rawName.slice(0, 14),
+        name: rawName,
+        color: '#6366F1',
+        scope: rawScope,
+        seats23: 0,
+        pct23: 0,
+        votes23: 0,
+        cat: 'extra26',
+        note26: 'Candidatura añadida manualmente.'
+      });
+      state.editor.seats[id] = 0;
+      state.editor.pct[id] = 0;
+      state.editor.showCatalogDrawer = false;
+      renderMain();
+      showToast(`"${rawName}" añadido para predecir`);
+    }
+
+    function saveMyPrediction() {
+      const name = (state.editor.name || '').trim();
+      if (!name) {
+        showToast('Introduce tu nombre para guardar tu porra', 'warning');
+        return;
+      }
+      const total = getTotalSeats(state.editor.seats);
+      if (total !== 350) {
+        showToast(`Debes repartir exactamente 350 escaños (tienes ${total})`, 'warning');
+        return;
+      }
+
+      const id = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || ('amigo-' + Date.now().toString().slice(-4));
+      const cleanSeats = {};
+      const cleanPct = {};
+      state.parties.forEach(p => {
+        const s = parseInt(state.editor.seats[p.id] || 0, 10);
+        const pc = parseFloat(state.editor.pct[p.id] || 0);
+        if (s > 0) cleanSeats[p.id] = s;
+        if (pc > 0) cleanPct[p.id] = pc;
+      });
+
+      const entry = {
+        id,
+        name,
+        updatedAt: 'Ahora mismo',
+        turnout: parseFloat(state.editor.turnout || 70),
+        comment: (state.editor.comment || '').trim() || 'Predicción guardada desde el mockup.',
+        seats: cleanSeats,
+        pct: cleanPct
+      };
+
+      const existingIdx = state.friends.findIndex(f => f.id === id || f.name.toLowerCase() === name.toLowerCase());
+      if (existingIdx >= 0) {
+        state.friends[existingIdx] = entry;
+      } else {
+        state.friends.unshift(entry);
+      }
+      state.groupSelectedFriendId = entry.id;
+      renderChrome();
+      showToast(`¡Predicción de ${name} guardada! Ya es visible para todo el grupo.`);
+    }
+
+    function loadFriendIntoEditor(friendId) {
+      const f = state.friends.find(x => x.id === friendId);
+      if (!f) return;
+      state.editor.name = f.name;
+      state.editor.turnout = f.turnout || 70;
+      state.editor.comment = f.comment || '';
+      state.parties.forEach(p => {
+        state.editor.seats[p.id] = f.seats?.[p.id] || 0;
+        state.editor.pct[p.id] = f.pct?.[p.id] || 0;
+      });
+      state.activeTab = 'predict';
+      renderChrome();
+      renderMain();
+      showToast(`Editando la porra de ${f.name}`);
+    }
+
+    // =========================================================================
+    // RENDERIZADO DEL CHROME (PC vs MÓVIL)
+    // =========================================================================
+    function renderChrome() {
+      const isMobile = state.viewport === 'mobile';
+      const btnD = document.getElementById('btn-view-desktop');
+      const btnM = document.getElementById('btn-view-mobile');
+
+      btnD.className = 'px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1.5 ' +
+        (!isMobile ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]');
+      btnM.className = 'px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1.5 ' +
+        (isMobile ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]');
+
+      const shell = document.getElementById('app-shell');
+      const dNav = document.getElementById('desktop-nav');
+      const mNav = document.getElementById('mobile-nav');
+      const header = document.getElementById('app-header');
+
+      if (isMobile) {
+        shell.className = 'w-full max-w-[390px] border-2 border-[var(--border)] rounded-3xl bg-[var(--background)] p-3 shadow-2xl transition-all duration-200';
+        dNav.classList.add('hidden');
+        mNav.classList.remove('hidden');
+        header.className = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 mb-3';
+      } else {
+        shell.className = 'w-full max-w-6xl transition-all duration-200';
+        dNav.classList.remove('hidden');
+        mNav.classList.add('hidden');
+        header.className = 'bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-4';
+      }
+
+      document.querySelectorAll('.friends-count').forEach(el => {
+        el.textContent = state.friends.length;
+      });
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const active = btn.dataset.tab === state.activeTab;
+        btn.className = 'nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ' +
+          (active ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]');
+      });
+
+      document.querySelectorAll('.mnav-btn').forEach(btn => {
+        const active = btn.dataset.tab === state.activeTab;
+        btn.className = 'mnav-btn flex flex-col items-center gap-1 py-1.5 rounded-lg text-xs font-medium ' +
+          (active ? 'pill-primary font-semibold' : 'text-[var(--muted-foreground)]');
+      });
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE LAS 4 PANTALLAS
+    // =========================================================================
+    function renderMain() {
+      const container = document.getElementById('main-content');
+      if (state.activeTab === 'predict') container.innerHTML = renderPredictTab();
+      else if (state.activeTab === 'group') container.innerHTML = renderGroupTab();
+      else if (state.activeTab === 'ranking') container.innerHTML = renderRankingTab();
+      else container.innerHTML = renderBaseTab();
+    }
+
+    // -------------------------------------------------------------------------
+    // VISTA 1: MI PORRA (EDITOR)
+    // -------------------------------------------------------------------------
+    function buildPredictPartyRowsHtml() {
+      const q = (state.editor.search || '').trim().toLowerCase();
+      const filtered = state.parties.filter(p => {
+        if (state.editor.filterCat === 'rep23' && p.cat !== 'rep23') return false;
+        if (state.editor.filterCat === 'extra26' && p.cat !== 'extra26') return false;
+        if (state.editor.filterCat === 'picked' && !(state.editor.seats[p.id] > 0 || state.editor.pct[p.id] > 0)) return false;
+        if (q) {
+          const hay = `${p.abbr} ${p.name} ${p.scope}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        return '<div class="text-xs text-[var(--muted-foreground)] py-6 text-center">No hay partidos que coincidan con el filtro.</div>';
+      }
+
+      return filtered.map(p => {
+        const s = state.editor.seats[p.id] || 0;
+        const pc = state.editor.pct[p.id] || 0;
+        const baseText = p.seats23 > 0
+          ? `23-J: <strong>${p.seats23}</strong> esc. (${p.pct23.toFixed(2)}%)`
+          : (p.pct23 > 0 ? `23-J: 0 esc. (${p.pct23.toFixed(2)}%)` : '23-J: No concurrió / coalición');
+
+        return `
+          <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] flex flex-col gap-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <span class="w-3 h-3 rounded-full mt-1 shrink-0" style="background:${p.color}"></span>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-sm">${escapeHtml(p.abbr)}</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded bg-[var(--content)] text-[var(--muted-foreground)] border border-[var(--border)]">${escapeHtml(p.scope)}</span>
+                  </div>
+                  <div class="text-xs text-[var(--muted-foreground)] truncate">${escapeHtml(p.name)}</div>
+                  <div class="text-xs text-[var(--muted-foreground)] mt-0.5">${baseText}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1 border-t border-[var(--card-border)]">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs text-[var(--muted-foreground)] mr-1">Escaños:</span>
+                <button onclick="adjustSeat('${p.id}', -1)"
+                  class="w-8 h-8 rounded-lg border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] flex items-center justify-center font-bold text-sm select-none">−</button>
+                <input id="seat-input-${p.id}" type="number" min="0" max="350" value="${s}"
+                  oninput="setSeatDirect('${p.id}', this.value)"
+                  class="w-14 h-8 text-center rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm font-bold tabular-nums focus:outline-none focus:border-[var(--primary)]" />
+                <button onclick="adjustSeat('${p.id}', 1)"
+                  class="w-8 h-8 rounded-lg border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] flex items-center justify-center font-bold text-sm select-none">+</button>
+              </div>
+
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-[var(--muted-foreground)]">% voto:</span>
+                <input type="number" step="0.1" min="0" max="100" value="${pc}"
+                  oninput="setPctDirect('${p.id}', this.value)"
+                  class="w-16 h-8 text-right px-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs font-semibold tabular-nums focus:outline-none focus:border-[var(--primary)]" />
+                <span class="text-xs text-[var(--muted-foreground)]">%</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updatePredictPartyList() {
+      const el = document.getElementById('predict-party-list');
+      if (el) el.innerHTML = buildPredictPartyRowsHtml();
+    }
+
+    function renderPredictTab() {
+      const isMobile = state.viewport === 'mobile';
+      const total = getTotalSeats(state.editor.seats);
+      const totalPct = getTotalPct(state.editor.pct).toFixed(1);
+      const diff = 350 - total;
+
+      let badgeClass = 'pill-success';
+      let badgeText = '350 / 350 · ¡Cuadra exacto!';
+      if (diff > 0) {
+        badgeClass = 'pill-warning';
+        badgeText = `${total} / 350 · Faltan ${diff}`;
+      } else if (diff < 0) {
+        badgeClass = 'pill-error';
+        badgeText = `${total} / 350 · Sobran ${Math.abs(diff)}`;
+      }
+
+      const availableExtra = EXTRA_BOE_CATALOG.filter(ex => !state.parties.some(p => p.id === ex.id));
+      const partyRows = buildPredictPartyRowsHtml();
+
+      return `
+        <div class="grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-12 gap-4 items-start'}">
+          <!-- Panel izquierdo: Identidad + Hemiciclo en vivo + Guardar -->
+          <div class="${isMobile ? '' : 'col-span-5 sticky top-16'} space-y-3">
+            <!-- Identificación del participante -->
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-bold">1. Tu perfil en la porra</h2>
+                <span class="text-xs text-[var(--muted-foreground)]">Editable con nombre + PIN</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="col-span-2">
+                  <label class="block text-xs text-[var(--muted-foreground)] mb-1">Tu nombre</label>
+                  <input type="text" value="${escapeHtml(state.editor.name)}"
+                    oninput="state.editor.name = this.value"
+                    placeholder="Ej. Alex"
+                    class="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs font-semibold focus:outline-none focus:border-[var(--primary)]" />
+                </div>
+                <div>
+                  <label class="block text-xs text-[var(--muted-foreground)] mb-1">PIN (opc.)</label>
+                  <input type="text" maxlength="6" value="${escapeHtml(state.editor.pin)}"
+                    oninput="state.editor.pin = this.value"
+                    placeholder="2026"
+                    class="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs font-semibold text-center tabular-nums focus:outline-none focus:border-[var(--primary)]" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Hemiciclo en vivo -->
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <h2 class="text-sm font-bold">2. Tu hemiciclo en tiempo real</h2>
+                <span id="editor-seats-badge" class="px-2.5 py-1 rounded-lg text-xs font-semibold border tabular-nums ${badgeClass}">
+                  ${badgeText}
+                </span>
+              </div>
+
+              <div id="editor-hemicycle">${renderHemicycleSVG(state.editor.seats)}</div>
+
+              <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] border-t border-[var(--card-border)] pt-2.5">
+                <span>Suma estimada de % voto:</span>
+                <span id="editor-pct-readout" class="font-semibold text-[var(--foreground)] tabular-nums">${totalPct}% sumado</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="copy23JToEditor()"
+                  class="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] text-xs font-medium transition-colors">
+                  Copiar base 23-J
+                </button>
+                <button onclick="zeroOutEditor()"
+                  class="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] text-xs font-medium transition-colors">
+                  Poner todo a 0
+                </button>
+              </div>
+            </div>
+
+            <!-- Extras y Guardar -->
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs text-[var(--muted-foreground)] mb-1">Participación est. (%)</label>
+                  <input type="number" step="0.1" min="0" max="100" value="${state.editor.turnout}"
+                    oninput="state.editor.turnout = this.value"
+                    class="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs font-semibold tabular-nums" />
+                </div>
+                <div class="flex items-end">
+                  <div class="text-xs text-[var(--muted-foreground)] pb-2">23-J: 70,39% (censo esp.)</div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-[var(--muted-foreground)] mb-1">Comentario / apuesta extra (visible a todos)</label>
+                <input type="text" value="${escapeHtml(state.editor.comment)}"
+                  oninput="state.editor.comment = this.value"
+                  placeholder="Ej. Creo que entra algún partido provincial sorpresa..."
+                  class="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs" />
+              </div>
+              <button onclick="saveMyPrediction()"
+                class="w-full py-2.5 px-4 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-bold text-sm hover:opacity-95 transition-opacity">
+                Guardar mi predicción
+              </button>
+            </div>
+          </div>
+
+          <!-- Panel derecho: Buscador y listado de partidos (con y sin representación) -->
+          <div class="${isMobile ? '' : 'col-span-7'} space-y-3">
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-sm font-bold">3. Predice todos los partidos (${state.parties.length} cargados)</h2>
+                  <p class="text-xs text-[var(--muted-foreground)]">Incluye partidos con escaño en 2023, nuevos de 2026 y extraparlamentarios.</p>
+                </div>
+              </div>
+
+              <!-- Buscador + filtros -->
+              <div class="space-y-2">
+                <input type="text" value="${escapeHtml(state.editor.search)}"
+                  oninput="state.editor.search = this.value; updatePredictPartyList();"
+                  placeholder="Buscar partido por siglas, nombre o territorio (ej. PACMA, SALF, BNG...)"
+                  class="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs focus:outline-none focus:border-[var(--primary)]" />
+
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  ${[
+                    ['all', `Todos (${state.parties.length})`],
+                    ['rep23', 'Con escaño 23-J'],
+                    ['extra26', 'Sin escaño / Nuevos 2026'],
+                    ['picked', 'Solo con predicción (>0)']
+                  ].map(([key, label]) => `
+                    <button onclick="state.editor.filterCat='${key}'; renderMain();"
+                      class="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                        state.editor.filterCat === key
+                          ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-transparent'
+                          : 'bg-[var(--content)] text-[var(--muted-foreground)] border-[var(--border)] hover:text-[var(--foreground)]'
+                      }">
+                      ${label}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Lista de partidos -->
+              <div id="predict-party-list" class="space-y-2">
+                ${partyRows}
+              </div>
+
+              <!-- Añadir cualquier otro partido de los 55 del BOE -->
+              <div class="pt-2 border-t border-[var(--card-border)]">
+                <button onclick="state.editor.showCatalogDrawer = !state.editor.showCatalogDrawer; renderMain();"
+                  class="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] text-xs font-semibold flex items-center justify-center gap-2 transition-colors">
+                  <span>+ Añadir otro partido del BOE (55 candidaturas 29-N) o personalizado</span>
+                </button>
+
+                ${state.editor.showCatalogDrawer ? `
+                  <div class="mt-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-3">
+                    <div class="text-xs font-semibold">Otras candidaturas proclamadas / territoriales:</div>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${availableExtra.length > 0 ? availableExtra.map(ex => `
+                        <button onclick="addExtraParty('${ex.id}')"
+                          class="px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)] text-xs font-medium flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full" style="background:${ex.color}"></span>
+                          + ${escapeHtml(ex.abbr)} <span class="text-[var(--muted-foreground)]">(${escapeHtml(ex.scope)})</span>
+                        </button>
+                      `).join('') : '<span class="text-xs text-[var(--muted-foreground)]">Todas las candidaturas del catálogo rápido ya están añadidas.</span>'}
+                    </div>
+                    <div class="pt-2 border-t border-[var(--card-border)] space-y-2">
+                      <div class="text-xs font-semibold">O añadir manualmente cualquier candidatura del BOE:</div>
+                      <div class="flex flex-wrap gap-2">
+                        <input id="custom-party-name" type="text" placeholder="Nombre o siglas (ej. Coalición por Melilla)"
+                          class="flex-1 min-w-[180px] px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs" />
+                        <input id="custom-party-scope" type="text" placeholder="Circunscripción (opc.)"
+                          class="w-36 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs" />
+                        <button onclick="addCustomParty()"
+                          class="px-3 py-1.5 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold">
+                          Añadir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // VISTA 2: VER TODAS LAS PREDICCIONES DEL GRUPO
+    // -------------------------------------------------------------------------
+    function renderGroupTab() {
+      const isMobile = state.viewport === 'mobile';
+
+      // Partidos que aparecen en alguna porra o tuvieron representación en 23-J
+      const activeParties = state.parties.filter(p => {
+        if (!state.groupOnlyActiveParties) return true;
+        if (p.seats23 > 0) return true;
+        return state.friends.some(f => (f.seats[p.id] || 0) > 0 || (f.pct[p.id] || 0) >= 0.5);
+      });
+
+      // Media del grupo por partido
+      const avgSeats = {};
+      state.parties.forEach(p => {
+        const sum = state.friends.reduce((acc, f) => acc + (f.seats[p.id] || 0), 0);
+        avgSeats[p.id] = (sum / Math.max(1, state.friends.length)).toFixed(1);
+      });
+
+      // Mayor división entre amigos (spread max - min)
+      let maxSpreadParty = null;
+      state.parties.forEach(p => {
+        const vals = state.friends.map(f => f.seats[p.id] || 0);
+        const spread = Math.max(...vals) - Math.min(...vals);
+        if (!maxSpreadParty || spread > maxSpreadParty.spread) {
+          maxSpreadParty = { abbr: p.abbr, spread, min: Math.min(...vals), max: Math.max(...vals) };
+        }
+      });
+
+      const selectedFriend = state.friends.find(f => f.id === state.groupSelectedFriendId) || state.friends[0];
+
+      return `
+        <div class="space-y-4">
+          <!-- Resumen del grupo -->
+          <div class="grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-3">
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4">
+              <div class="text-xs text-[var(--muted-foreground)]">Participantes guardados</div>
+              <div class="text-2xl font-bold mt-1 tabular-nums">${state.friends.length} amigos</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-1">Todos pueden ver las apuestas de todos</div>
+            </div>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4">
+              <div class="text-xs text-[var(--muted-foreground)]">Mayor consenso (media 1º puesto)</div>
+              <div class="text-lg font-bold mt-1 tabular-nums">PP ${avgSeats.pp} · PSOE ${avgSeats.psoe}</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-1">Promedio de escaños del grupo</div>
+            </div>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4">
+              <div class="text-xs text-[var(--muted-foreground)]">Mayor debate en la porra</div>
+              <div class="text-lg font-bold mt-1 tabular-nums">${escapeHtml(maxSpreadParty?.abbr || '-')} (horquilla ${maxSpreadParty?.min}–${maxSpreadParty?.max})</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-1">Diferencia de ${maxSpreadParty?.spread || 0} escaños entre amigos</div>
+            </div>
+          </div>
+
+          <!-- Controles de vista -->
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="inline-flex rounded-xl border border-[var(--border)] bg-[var(--content)] p-1 text-xs">
+                <button onclick="state.groupViewMode='table'; renderMain();"
+                  class="px-3 py-1.5 rounded-lg font-semibold ${state.groupViewMode === 'table' ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'text-[var(--muted-foreground)]'}">
+                  Tabla comparativa
+                </button>
+                <button onclick="state.groupViewMode='cards'; renderMain();"
+                  class="px-3 py-1.5 rounded-lg font-semibold ${state.groupViewMode === 'cards' ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'text-[var(--muted-foreground)]'}">
+                  Ver por amigo
+                </button>
+              </div>
+
+              ${state.groupViewMode === 'table' ? `
+                <label class="flex items-center gap-2 text-xs text-[var(--muted-foreground)] cursor-pointer">
+                  <input type="checkbox" ${state.groupOnlyActiveParties ? 'checked' : ''}
+                    onchange="state.groupOnlyActiveParties = this.checked; renderMain();"
+                    class="accent-[var(--primary)]" />
+                  Ocultar partidos con 0 en todas las porras
+                </label>
+              ` : ''}
+            </div>
+
+            ${state.groupViewMode === 'table' ? `
+              <div class="overflow-x-auto border border-[var(--border)] rounded-xl">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-[var(--content)] border-b border-[var(--border)]">
+                      <th class="py-2.5 px-3 font-bold sticky left-0 bg-[var(--content)] z-10 min-w-[140px]">Partido</th>
+                      <th class="py-2.5 px-3 font-semibold text-right text-[var(--muted-foreground)] whitespace-nowrap">23-J (Base)</th>
+                      <th class="py-2.5 px-3 font-semibold text-right whitespace-nowrap">Media</th>
+                      ${state.friends.map(f => `
+                        <th class="py-2.5 px-3 font-bold text-right whitespace-nowrap">
+                          <button onclick="state.groupSelectedFriendId='${f.id}'; state.groupViewMode='cards'; renderMain();" class="hover:underline text-[var(--link)]">
+                            ${escapeHtml(f.name)}
+                          </button>
+                        </th>
+                      `).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${activeParties.map(p => `
+                      <tr class="border-b border-[var(--card-border)] hover:bg-[var(--content)]">
+                        <td class="py-2 px-3 sticky left-0 bg-[var(--card)] z-10">
+                          <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${p.color}"></span>
+                            <span class="font-semibold">${escapeHtml(p.abbr)}</span>
+                          </div>
+                        </td>
+                        <td class="py-2 px-3 text-right tabular-nums text-[var(--muted-foreground)]">${p.seats23}</td>
+                        <td class="py-2 px-3 text-right tabular-nums font-semibold">${avgSeats[p.id]}</td>
+                        ${state.friends.map(f => {
+                          const s = f.seats[p.id] || 0;
+                          const pc = f.pct[p.id];
+                          const delta = s - p.seats23;
+                          const deltaTxt = delta > 0 ? `+${delta}` : (delta < 0 ? `${delta}` : '');
+                          return `
+                            <td class="py-2 px-3 text-right tabular-nums">
+                              <span class="font-bold ${s === 0 ? 'text-[var(--muted-foreground)]' : ''}">${s}</span>
+                              ${deltaTxt ? `<span class="text-xs ml-0.5 ${delta > 0 ? 'text-[var(--success)]' : 'text-[var(--error)]'}">(${deltaTxt})</span>` : ''}
+                              ${pc ? `<div class="text-xs text-[var(--muted-foreground)]">${pc}%</div>` : ''}
+                            </td>
+                          `;
+                        }).join('')}
+                      </tr>
+                    `).join('')}
+                    <tr class="bg-[var(--content)] font-bold">
+                      <td class="py-2.5 px-3 sticky left-0 bg-[var(--content)]">Participación est.</td>
+                      <td class="py-2.5 px-3 text-right tabular-nums text-[var(--muted-foreground)]">70,4%</td>
+                      <td class="py-2.5 px-3 text-right tabular-nums">${(state.friends.reduce((a, f) => a + (parseFloat(f.turnout) || 70), 0) / state.friends.length).toFixed(1)}%</td>
+                      ${state.friends.map(f => `<td class="py-2.5 px-3 text-right tabular-nums">${f.turnout || '-'}%</td>`).join('')}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ` : `
+              <!-- Vista por tarjetas de amigos -->
+              <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                ${state.friends.map(f => `
+                  <button onclick="state.groupSelectedFriendId='${f.id}'; renderMain();"
+                    class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
+                      selectedFriend?.id === f.id
+                        ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-transparent'
+                        : 'bg-[var(--content)] text-[var(--foreground)] border-[var(--border)]'
+                    }">
+                    ${escapeHtml(f.name)}
+                  </button>
+                `).join('')}
+              </div>
+
+              ${selectedFriend ? `
+                <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h3 class="text-base font-bold">Porra de ${escapeHtml(selectedFriend.name)}</h3>
+                      <div class="text-xs text-[var(--muted-foreground)]">Actualizada: ${escapeHtml(selectedFriend.updatedAt)} · Participación est.: ${selectedFriend.turnout}%</div>
+                    </div>
+                    <button onclick="loadFriendIntoEditor('${selectedFriend.id}')"
+                      class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)] text-xs font-semibold">
+                      Cargar en editor
+                    </button>
+                  </div>
+
+                  ${selectedFriend.comment ? `
+                    <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs italic text-[var(--muted-foreground)]">
+                      "${escapeHtml(selectedFriend.comment)}"
+                    </div>
+                  ` : ''}
+
+                  ${renderHemicycleSVG(selectedFriend.seats)}
+
+                  <div class="grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2">
+                    ${state.parties
+                      .filter(p => (selectedFriend.seats[p.id] || 0) > 0 || (selectedFriend.pct[p.id] || 0) > 0)
+                      .sort((a, b) => (selectedFriend.seats[b.id] || 0) - (selectedFriend.seats[a.id] || 0) || (selectedFriend.pct[b.id] || 0) - (selectedFriend.pct[a.id] || 0))
+                      .map(p => {
+                        const s = selectedFriend.seats[p.id] || 0;
+                        const pc = selectedFriend.pct[p.id] || 0;
+                        const d = s - p.seats23;
+                        return `
+                          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${p.color}"></span>
+                              <span class="font-bold truncate">${escapeHtml(p.abbr)}</span>
+                            </div>
+                            <div class="flex items-center gap-2 tabular-nums">
+                              <span class="font-bold text-sm">${s} esc.</span>
+                              <span class="text-[var(--muted-foreground)]">(${pc}%)</span>
+                              ${d !== 0 ? `<span class="${d > 0 ? 'text-[var(--success)]' : 'text-[var(--error)]'} font-semibold">${d > 0 ? '+' + d : d}</span>` : ''}
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // VISTA 3: RESULTADOS POST-ELECCIONES Y RANKING
+    // -------------------------------------------------------------------------
+    function updateOfficialField(field, partyId, rawVal) {
+      if (field === 'seats') {
+        state.officialResults.seats[partyId] = Math.max(0, Math.min(350, parseInt(rawVal || 0, 10) || 0));
+      } else {
+        state.officialResults.pct[partyId] = Math.max(0, Math.min(100, parseFloat(rawVal || 0) || 0));
+      }
+      const totalEl = document.getElementById('official-total-seats');
+      if (totalEl) totalEl.textContent = `${getTotalSeats(state.officialResults.seats)}/350 esc.`;
+      const liveEl = document.getElementById('ranking-live-results');
+      if (liveEl) liveEl.innerHTML = buildRankingBodyHtml();
+    }
+
+    function buildRankingBodyHtml() {
+      const isMobile = state.viewport === 'mobile';
+      const ranking = computeRanking();
+
+      return `
+          <!-- Podio Top 3 -->
+          <div class="grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-3">
+            ${ranking.slice(0, 3).map((r, idx) => {
+              const medals = ['1.º puesto', '2.º puesto', '3.º puesto'];
+              const borders = ['border-[var(--warning)]', 'border-[var(--border)]', 'border-[var(--border)]'];
+              return `
+                <div class="bg-[var(--card)] border-2 ${borders[idx]} rounded-2xl p-4 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-md border ${idx === 0 ? 'pill-warning' : 'bg-[var(--content)] text-[var(--muted-foreground)] border-transparent'}">
+                      ${medals[idx]}
+                    </span>
+                    <span class="text-base font-bold tabular-nums text-[var(--primary)]">${r.scoreLabel}</span>
+                  </div>
+                  <div class="text-lg font-bold">${escapeHtml(r.friend.name)}</div>
+                  <div class="text-xs text-[var(--muted-foreground)] space-y-0.5 tabular-nums">
+                    <div>Desviación total: <strong class="text-[var(--foreground)]">±${r.absSeatErr} escaños</strong> (${r.absPctErr} pts %)</div>
+                    <div>Plenos exactos: <strong class="text-[var(--foreground)]">${r.exactHits}</strong> · ${r.bestParty ? `Mejor: ${escapeHtml(r.bestParty.abbr)} (±${r.bestParty.errS})` : ''}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Tabla completa de clasificación con detalle desplegable -->
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+            <h3 class="text-sm font-bold">Clasificación completa (pulsa en un amigo para ver partido a partido)</h3>
+            <div class="space-y-2">
+              ${ranking.map((r, idx) => {
+                const isOpen = state.expandedRankFriendId === r.friend.id;
+                return `
+                  <div class="rounded-xl border border-[var(--border)] bg-[var(--background)] overflow-hidden">
+                    <button onclick="state.expandedRankFriendId = '${isOpen ? '' : r.friend.id}'; document.getElementById('ranking-live-results').innerHTML = buildRankingBodyHtml();"
+                      class="w-full p-3 flex flex-wrap items-center justify-between gap-2 text-left hover:bg-[var(--content)] transition-colors">
+                      <div class="flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-lg bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-xs font-bold tabular-nums">
+                          #${idx + 1}
+                        </span>
+                        <div>
+                          <div class="text-sm font-bold">${escapeHtml(r.friend.name)}</div>
+                          <div class="text-xs text-[var(--muted-foreground)] tabular-nums">
+                            Error total: ±${r.absSeatErr} escaños · ${r.exactHits} plenos exactos
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold tabular-nums text-[var(--primary)]">${r.scoreLabel}</span>
+                        <span class="text-xs text-[var(--muted-foreground)]">${isOpen ? '▲' : '▼'}</span>
+                      </div>
+                    </button>
+
+                    ${isOpen ? `
+                      <div class="p-3 border-t border-[var(--border)] bg-[var(--card)] overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                          <thead>
+                            <tr class="text-[var(--muted-foreground)] border-b border-[var(--border)]">
+                              <th class="py-1.5 pr-2">Partido</th>
+                              <th class="py-1.5 px-2 text-right">Predicho</th>
+                              <th class="py-1.5 px-2 text-right">Resultado</th>
+                              <th class="py-1.5 px-2 text-right">Diferencia</th>
+                              <th class="py-1.5 pl-2 text-right">% (Pred / Real)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${r.breakdown.map(b => `
+                              <tr class="border-b border-[var(--card-border)]">
+                                <td class="py-1.5 pr-2 font-semibold flex items-center gap-1.5">
+                                  <span class="w-2 h-2 rounded-full" style="background:${b.party.color}"></span>
+                                  ${escapeHtml(b.party.abbr)}
+                                </td>
+                                <td class="py-1.5 px-2 text-right tabular-nums">${b.predS}</td>
+                                <td class="py-1.5 px-2 text-right tabular-nums font-bold">${b.realS}</td>
+                                <td class="py-1.5 px-2 text-right tabular-nums font-semibold ${
+                                  b.errS === 0 ? 'text-[var(--success)]' : b.errS <= 3 ? 'text-[var(--warning)]' : 'text-[var(--error)]'
+                                }">
+                                  ${b.errS === 0 ? 'Exacto' : (b.diffS > 0 ? '+' + b.diffS : b.diffS)}
+                                </td>
+                                <td class="py-1.5 pl-2 text-right tabular-nums text-[var(--muted-foreground)]">
+                                  ${b.predP.toFixed(1)}% / ${b.realP.toFixed(1)}%
+                                </td>
+                              </tr>
+                            `).join('')}
+                          </tbody>
+                        </table>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+      `;
+    }
+
+    function renderRankingTab() {
+      const isMobile = state.viewport === 'mobile';
+
+      if (!state.resultsLoaded) {
+        return `
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-4">
+            <div class="w-12 h-12 rounded-2xl pill-primary mx-auto flex items-center justify-center">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div class="max-w-lg mx-auto space-y-2">
+              <h2 class="text-base font-bold">Esperando a los resultados del 29 de noviembre de 2026</h2>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                Cuando termine el escrutinio tras las elecciones, podrás cargar los resultados oficiales aquí (manualmente o importando datos) y la web calculará automáticamente el ranking de quién ha acertado más.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button onclick="state.resultsLoaded = true; renderMain(); showToast('Resultados ficticios cargados para probar el ranking');"
+                class="px-4 py-2.5 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-bold hover:opacity-95">
+                Simular noche electoral (cargar demo ficticia)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      const totalOfficial = getTotalSeats(state.officialResults.seats);
+
+      return `
+        <div class="space-y-4">
+          <!-- Banner de simulación y controles -->
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold border pill-warning">
+                  SIMULACIÓN DE DEMOSTRACIÓN
+                </span>
+                <span class="text-xs text-[var(--muted-foreground)]">
+                  Cifras ficticias de ejemplo para visualizar cómo funciona el ranking (<span id="official-total-seats" class="font-semibold">${totalOfficial}/350 esc.</span>)
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="state.editingOfficial = !state.editingOfficial; renderMain();"
+                  class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)] text-xs font-semibold">
+                  ${state.editingOfficial ? 'Cerrar editor de resultados' : 'Editar resultados'}
+                </button>
+                <button onclick="state.resultsLoaded = false; state.editingOfficial = false; renderMain();"
+                  class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                  Ocultar demo
+                </button>
+              </div>
+            </div>
+
+            ${state.editingOfficial ? `
+              <div id="official-results-editor" class="p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-3">
+                <div class="text-xs font-bold">Modificar resultado cargado (el ranking se recalcula al instante):</div>
+                <div class="grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-2 max-h-64 overflow-y-auto pr-1">
+                  ${state.parties.map(p => `
+                    <div class="flex items-center justify-between gap-2 p-2 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs">
+                      <span class="font-semibold truncate">${escapeHtml(p.abbr)}</span>
+                      <div class="flex items-center gap-1">
+                        <input type="number" min="0" max="350" value="${state.officialResults.seats[p.id] || 0}"
+                          oninput="updateOfficialField('seats', '${p.id}', this.value)"
+                          class="w-12 px-1.5 py-1 rounded border border-[var(--border)] bg-[var(--background)] text-right font-bold tabular-nums" />
+                        <span class="text-[var(--muted-foreground)]">esc</span>
+                        <input type="number" step="0.1" min="0" max="100" value="${state.officialResults.pct[p.id] || 0}"
+                          oninput="updateOfficialField('pct', '${p.id}', this.value)"
+                          class="w-12 px-1.5 py-1 rounded border border-[var(--border)] bg-[var(--background)] text-right tabular-nums" />
+                        <span class="text-[var(--muted-foreground)]">%</span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Selector de fórmula de puntuación -->
+            <div class="pt-2 border-t border-[var(--card-border)] flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-semibold">Fórmula de puntuación:</span>
+              <div class="flex flex-wrap gap-1.5">
+                ${[
+                  ['mae', 'Exactitud escaños (1000 − 8×error)'],
+                  ['mixed', 'Mixto: Escaños + % Voto'],
+                  ['classic', 'Puntos por aciertos + bonus']
+                ].map(([key, label]) => `
+                  <button onclick="state.scoringMode='${key}'; renderMain();"
+                    class="px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                      state.scoringMode === key
+                        ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-transparent'
+                        : 'bg-[var(--content)] text-[var(--muted-foreground)] border-[var(--border)]'
+                    }">
+                    ${label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div id="ranking-live-results" class="space-y-4">
+            ${buildRankingBodyHtml()}
+          </div>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // VISTA 4: BASE OFICIAL 23-J (2023) Y CONTEXTO 29-N (2026)
+    // -------------------------------------------------------------------------
+    function renderBaseTab() {
+      const isMobile = state.viewport === 'mobile';
+      const base23Map = {};
+      BASE_PARTIES.forEach(p => { if (p.seats23 > 0) base23Map[p.id] = p.seats23; });
+
+      return `
+        <div class="space-y-4">
+          <div class="grid ${isMobile ? 'grid-cols-1' : 'grid-cols-12'} gap-4">
+            <div class="${isMobile ? '' : 'col-span-5'} bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div>
+                <h2 class="text-sm font-bold">Congreso 23-J de 2023 (Base oficial)</h2>
+                <p class="text-xs text-[var(--muted-foreground)]">Fuente: Junta Electoral Central / BOE · 350 escaños</p>
+              </div>
+              ${renderHemicycleSVG(base23Map)}
+              <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-[var(--card-border)]">
+                <div class="p-2.5 rounded-xl bg-[var(--content)]">
+                  <div class="text-[var(--muted-foreground)]">Censo electoral</div>
+                  <div class="font-bold tabular-nums mt-0.5">37.469.458</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[var(--content)]">
+                  <div class="text-[var(--muted-foreground)]">Participación (total / esp.)</div>
+                  <div class="font-bold tabular-nums mt-0.5">66,59% / 70,39%</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[var(--content)]">
+                  <div class="text-[var(--muted-foreground)]">Votos válidos</div>
+                  <div class="font-bold tabular-nums mt-0.5">24.688.087</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[var(--content)]">
+                  <div class="text-[var(--muted-foreground)]">Blanco / Nulos</div>
+                  <div class="font-bold tabular-nums mt-0.5">200.673 / 264.360</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="${isMobile ? '' : 'col-span-7'} bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-sm font-bold">Resultados oficiales 23-J y candidaturas 29-N 2026</h2>
+                  <p class="text-xs text-[var(--muted-foreground)]">Incluye formaciones que no lograron representación en 2023 y novedades del BOE 273 (2026).</p>
+                </div>
+              </div>
+              <div class="overflow-x-auto border border-[var(--border)] rounded-xl max-h-[420px]">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead class="sticky top-0 bg-[var(--content)] border-b border-[var(--border)]">
+                    <tr>
+                      <th class="py-2 px-3">Partido / Coalición</th>
+                      <th class="py-2 px-3 text-right">Escaños 23-J</th>
+                      <th class="py-2 px-3 text-right">% Voto 23-J</th>
+                      <th class="py-2 px-3 text-right">Votos 23-J</th>
+                      <th class="py-2 px-3">Nota 29-N 2026</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${BASE_PARTIES.map(p => `
+                      <tr class="border-b border-[var(--card-border)]">
+                        <td class="py-2 px-3">
+                          <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${p.color}"></span>
+                            <div>
+                              <div class="font-bold">${escapeHtml(p.abbr)}</div>
+                              <div class="text-xs text-[var(--muted-foreground)]">${escapeHtml(p.scope)}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-2 px-3 text-right tabular-nums font-bold">${p.seats23}</td>
+                        <td class="py-2 px-3 text-right tabular-nums">${p.pct23 ? p.pct23.toFixed(2) + '%' : '—'}</td>
+                        <td class="py-2 px-3 text-right tabular-nums text-[var(--muted-foreground)]">${p.votes23 ? p.votes23.toLocaleString('es-ES') : '—'}</td>
+                        <td class="py-2 px-3 text-[var(--muted-foreground)] max-w-[240px]">${escapeHtml(p.note26)}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Arranque inicial
+    renderChrome();
+    renderMain();
+  </script>
+</body>
+</html>

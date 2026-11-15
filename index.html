@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Porra Elecciones España 2026 (29-N)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('porra29n_theme');
+        if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Cabecera principal -->
+    <header class="top-header">
+      <div class="header-row">
+        <div class="brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 20h16M6 16V10a6 6 0 0 1 12 0v6M9 16v-3a3 3 0 0 1 6 0v3"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title" id="header-title">Porra Elecciones España 2026</h1>
+            <p class="brand-sub" id="header-sub">29-N · Congreso de los Diputados (350 escaños) · Sin PIN</p>
+          </div>
+        </div>
+
+        <div class="header-meta">
+          <span id="deadline-badge" class="badge badge-primary tabular">Cierre: 28/11 23:59</span>
+          <button id="btn-storage-status" class="badge" onclick="window.__porraActions.openCloudModal()" title="Configurar almacenamiento compartido gratuito">
+            <span id="storage-dot" style="width:8px;height:8px;border-radius:999px;background:var(--muted);"></span>
+            <span id="storage-label">Cargando...</span>
+          </button>
+          <button class="btn btn-sm" onclick="window.__porraActions.toggleTheme()" title="Cambiar tema claro/oscuro">
+            Tema
+          </button>
+        </div>
+      </div>
+
+      <!-- Navegación PC -->
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        <button class="nav-pill" data-tab="predict" onclick="window.__porraActions.switchTab('predict')">Mi Porra</button>
+        <button class="nav-pill" data-tab="group" onclick="window.__porraActions.switchTab('group')">Porras del Grupo (<span class="friends-count">0</span>)</button>
+        <button class="nav-pill" data-tab="ranking" onclick="window.__porraActions.switchTab('ranking')">Resultados y Ranking</button>
+        <button class="nav-pill" data-tab="scoring" onclick="window.__porraActions.switchTab('scoring')">Puntuación (+1 / -1)</button>
+        <button class="nav-pill" data-tab="base" onclick="window.__porraActions.switchTab('base')">Base 23-J y Encuestas</button>
+      </nav>
+    </header>
+
+    <!-- Aviso de almacenamiento local si aún no se conectó la nube -->
+    <div id="storage-banner" class="hidden"></div>
+
+    <!-- Contenido dinámico -->
+    <main id="app-main"></main>
+  </div>
+
+  <!-- Navegación inferior Móvil -->
+  <nav class="mobile-nav" aria-label="Navegación móvil">
+    <button class="mnav-btn" data-tab="predict" onclick="window.__porraActions.switchTab('predict')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <span>Mi Porra</span>
+    </button>
+    <button class="mnav-btn" data-tab="group" onclick="window.__porraActions.switchTab('group')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Grupo (<span class="friends-count">0</span>)</span>
+    </button>
+    <button class="mnav-btn" data-tab="ranking" onclick="window.__porraActions.switchTab('ranking')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <span>Ranking</span>
+    </button>
+    <button class="mnav-btn" data-tab="scoring" onclick="window.__porraActions.switchTab('scoring')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+      <span>Puntos</span>
+    </button>
+    <button class="mnav-btn" data-tab="base" onclick="window.__porraActions.switchTab('base')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
+      <span>Base 23-J</span>
+    </button>
+  </nav>
+
+  <!-- Modal de configuración de nube gratuita (Supabase) -->
+  <div id="cloud-modal" class="modal-backdrop hidden" onclick="if(event.target===this) window.__porraActions.closeCloudModal()">
+    <div class="modal-panel stack-md" id="cloud-modal-body"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite">
+    <span id="toast-dot" style="width:9px;height:9px;border-radius:999px;background:var(--success);flex-shrink:0;"></span>
+    <span id="toast-msg"></span>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
